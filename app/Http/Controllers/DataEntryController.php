@@ -56,6 +56,8 @@ class DataEntryController extends Controller
 
     public function addEntryData(Request $request) {
 
+        $criterion = "";
+
         $exist = Criterion::where([
             'id_usuario' => auth()->user()->id_usuario,
             'id_empresa' => $request->get('business'),
@@ -64,6 +66,8 @@ class DataEntryController extends Controller
             'mes_inicio' => $request->get('month'),
             'anio_inicio' => $request->get('year'),
         ])->first();
+
+        $criterion = $exist->id_criterio;
 
         if(!$exist) {
             $period = PeriodCalculation::where('id_periodo', $request->get('period'))->first();
@@ -101,21 +105,27 @@ class DataEntryController extends Controller
                 'numero_dias' => $endMonth->format('Y'),
                 'activo' => 'A'
             ]);
+
+            $criterion = $criterion->id_criterio;
         }
 
 
 
         return response()->json([
             'status' => '200',
+            'criterion' => $criterion,
         ], 200);
 
     }
 
-    public function getVelues() {
+    public function getVelues(Request $request) {
 
         $values = Entry::select('tbl_rubros.id_rubro as id','descripcion as description', 'nemonico as name',
              'valor_pp as currentPeriod', 'valor_pa as previousPeriod', 'edita_pp as previousEdit', 'edita_pa as currentEdit', 'notas as note')
-            ->where('tbl_rubros.estado', 'A')
+            ->where([
+                'tbl_rubros.estado' => 'A',
+                'tbl_valores.id_criterio' =>  $request->get('criterion'),
+            ])
             ->leftJoin('tbl_valores', 'tbl_valores.id_rubro', '=', 'tbl_rubros.id_rubro')
             ->get();
 
@@ -128,14 +138,15 @@ class DataEntryController extends Controller
 
     public function addValues(Request $request) {
 
-        foreach ($request->values as $key => $value) {
+        foreach ($request->get('values') as $value) {
+
             Value::create([
-                'id_criterio' => $request->->get('criterion'),
-                'id_rubro' => $value->id,
-                'valor_pp' => $value->currentPeriod,
-                'valor_pa' => $value->previousPeriod,
+                'id_criterio' => $request->get('criterion'),
+                'id_rubro' => $value['id'],
+                'valor_pp' => $value['currentPeriod'],
+                'valor_pa' => $value['previousPeriod'],
                 'estado' => 'A'
-            ])
+            ]);
         }
 
         return response()->json([
@@ -143,5 +154,5 @@ class DataEntryController extends Controller
         ], 200);
     }
 
-    }
+
 }
