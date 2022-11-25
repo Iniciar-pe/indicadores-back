@@ -120,6 +120,8 @@ class DataEntryController extends Controller
 
     public function getVelues(Request $request) {
 
+        $response = '';
+
         $values = Entry::select('tbl_rubros.id_rubro as id','descripcion as description', 'nemonico as name',
              'valor_pp as currentPeriod', 'valor_pa as previousPeriod', 'edita_pp as previousEdit', 'edita_pa as currentEdit', 'notas as note')
             ->where([
@@ -128,6 +130,15 @@ class DataEntryController extends Controller
             ])
             ->leftJoin('tbl_valores', 'tbl_valores.id_rubro', '=', 'tbl_rubros.id_rubro')
             ->get();
+
+        if($values->isEmpty()) {
+            $values = Entry::select('tbl_rubros.id_rubro as id','descripcion as description', 'nemonico as name',
+                'edita_pp as previousEdit', 'edita_pa as currentEdit', 'notas as note')
+                ->where([
+                    'tbl_rubros.estado' => 'A',
+                ])
+                ->get();
+        }
 
         return response()->json([
             'values' => $values,
@@ -138,16 +149,34 @@ class DataEntryController extends Controller
 
     public function addValues(Request $request) {
 
-        foreach ($request->get('values') as $value) {
 
-            Value::create([
-                'id_criterio' => $request->get('criterion'),
-                'id_rubro' => $value['id'],
-                'valor_pp' => $value['currentPeriod'],
-                'valor_pa' => $value['previousPeriod'],
-                'estado' => 'A'
-            ]);
+        $value = Value::where('id_criterio')->first();
+
+        if(!$value) {
+            foreach ($request->get('values') as $value) {
+
+                Value::create([
+                    'id_criterio' => $request->get('criterion'),
+                    'id_rubro' => $value['id'],
+                    'valor_pp' => $value['currentPeriod'],
+                    'valor_pa' => $value['previousPeriod'],
+                    'estado' => 'A'
+                ]);
+            }
+        } else {
+
+            foreach ($request->get('values') as $value) {
+
+                $values = Value::where('id_criterio', $request->get('criterion'))
+                    ->where('id_criterio', $value['id'])
+                    ->first();
+
+                $values->valor_pp = $value['currentPeriod'];
+                $values->valor_pa = $value['previousPeriod'];
+                $values->save();
+            }
         }
+
 
         return response()->json([
             'status' => '200',

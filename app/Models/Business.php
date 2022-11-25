@@ -27,4 +27,9 @@ class Business extends Model
     protected $attributes = [
         'estado' => 'A',
     ];
+
+    public function businessBranch() {
+        return $this->hasMany('App\Models\Business', 'id_empresa', 'id_empresa_padre');
+    }
+
 }
