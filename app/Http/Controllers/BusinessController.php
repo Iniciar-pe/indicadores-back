@@ -99,8 +99,12 @@ class BusinessController extends Controller
         return Business::orderBy('id_empresa', 'desc')->first();
     }
 
-    public function getBusiness(Request $request)
-    {
+    public function getBusiness(Request $request) {
+
+        $default = \App\Models\LicenseDistribution::select('id_usuario as user', 'id_empresa as business', 'id_usuario_asignado as id')
+            ->where('id_usuario_asignado', auth()->user()->id_usuario)
+            ->where('estado', 'A')
+            ->get();
 
         $lisence = \App\Models\LicenseDistribution::select('id_usuario as user', 'id_empresa as business', 'id_usuario_asignado as id')
             ->where('id_usuario_asignado', auth()->user()->id_usuario)
@@ -165,6 +169,7 @@ class BusinessController extends Controller
         return response()->json([
             'status' => '200',
             'business' => $array,
+            'default' => $default,
         ], 200);
     }
 

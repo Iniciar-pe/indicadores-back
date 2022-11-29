@@ -21,7 +21,7 @@ class DataEntryController extends Controller
     public function getEntryData(Request $request)
     {
 
-        $periodo = PeriodCalculation::select('id_periodo as id', 'nombre_periodo as name', 'estado as status')
+        $periodo = PeriodCalculation::select('id_periodo as id', 'nombre_periodo as name', 'estado as status', 'cantidad_meses as count')
             ->where('estado', 'A')
             ->orderBy('id_periodo', 'asc')->get();
 
@@ -29,28 +29,40 @@ class DataEntryController extends Controller
             ->where('estado', 'A')
             ->orderBy('id_moneda', 'asc')->get();
 
-        $criterion = Criterion:: select('id_criterio as id', 'id_periodo as period', 'id_moneda as currency', 'mes_inicio as startMonth',
-            'anio_inicio as startYear', 'mes_fin as endMonth', 'anio_fin as endYear', 'mes_inicio_pa as startMonthPeriod',
-            'anio_inicio_pa as startYearPeriod', 'mes_fin_pa as endMonthPeriod', 'anio_fin_pa as endYearPeriod')
-            ->where([
-                'id_usuario' => auth()->user()->id_usuario,
-                'activo' => 'A'
-            ])->orderBy('id_criterio', 'desc')
-            ->first();
+        if ($request->get('type') == '3') {
 
-        $Business = \App\Models\Business::select('id_empresa as id', 'id_empresa_padre as indicator')
-            ->where('id_usuario', auth()->user()->id_usuario)
-            ->where('estado', 'A')
-            ->orderBy('id_empresa', 'asc')
-            ->first();
+            $criterion = Criterion:: select('id_criterio as id', 'id_empresa as business', 'id_periodo as period', 'id_moneda as currency', 'mes_inicio as startMonth',
+                'anio_inicio as startYear', 'mes_fin as endMonth', 'anio_fin as endYear', 'mes_inicio_pa as startMonthPeriod',
+                'anio_inicio_pa as startYearPeriod', 'mes_fin_pa as endMonthPeriod', 'anio_fin_pa as endYearPeriod')
+                ->where([
+                    'id_usuario' => $request->get('user'),
+                    'activo' => 'A',
+                    'id_empresa' => $request->get('chill')
+                ])->orderBy('id_criterio', 'desc')
+                ->first();
+
+
+        } else {
+
+            $criterion = Criterion:: select('id_criterio as id', 'id_empresa as business', 'id_periodo as period', 'id_moneda as currency', 'mes_inicio as startMonth',
+                'anio_inicio as startYear', 'mes_fin as endMonth', 'anio_fin as endYear', 'mes_inicio_pa as startMonthPeriod',
+                'anio_inicio_pa as startYearPeriod', 'mes_fin_pa as endMonthPeriod', 'anio_fin_pa as endYearPeriod')
+                ->where([
+                    'id_usuario' => auth()->user()->id_usuario,
+                    'activo' => 'A',
+                    'id_empresa' => $request->get('id')
+                ])->orderBy('id_criterio', 'desc')
+                ->first();
+
+        }
+
+
 
         return response()->json([
             'status' => '200',
             'period' => $periodo,
             'currency' => $currency,
             'criterion' => $criterion,
-            'business' => $Business->id,
-            'indicator' => $Business->indicator
         ], 200);
     }
 
@@ -62,14 +74,15 @@ class DataEntryController extends Controller
             'id_usuario' => auth()->user()->id_usuario,
             'id_empresa' => $request->get('business'),
             'id_periodo' => $request->get('period'),
-            'id_moneda' => $request->get('currency'),
+            //'id_moneda' => $request->get('currency'),
             'mes_inicio' => $request->get('month'),
             'anio_inicio' => $request->get('year'),
         ])->first();
 
-        $criterion = $exist->id_criterio;
+
 
         if(!$exist) {
+
             $period = PeriodCalculation::where('id_periodo', $request->get('period'))->first();
 
             $date = Carbon::parse($request->get('year').'-'.$request->get('month').'-01');
@@ -82,31 +95,44 @@ class DataEntryController extends Controller
             $endMonth = $endPa->subMonth();
 
 
-            //$end_date = date("Y-m-t", strtotime($addMonth->format('Y-m-d')));
-            //Establecer la fecha de inicio
-            /*$end_date = Carbon::parse(date("Y-m-t", strtotime($addMonth->format('Y').'-'.$addMonth->format('m').'-01')));
-            $start_date = Carbon::parse('Ymd' , $request->get('year').'-'.$request->get('month').'-01');
-            $endDate = Carbon::parse('Ymd' , $addMonth->format('Y').'-'.$addMonth->format('m').'-'.$end_date->format('d'));
-    */
-
-            $criterion = Criterion::create([
+            $getCriterion = Criterion::create([
                 'id_usuario' => auth()->user()->id_usuario,
                 'id_empresa' => $request->get('business'),
                 'id_periodo' => $request->get('period'),
                 'id_moneda' => $request->get('currency'),
                 'mes_inicio' => $request->get('month'),
-                'anio_inicio' => $request->get('year'), //
+                'anio_inicio' => $request->get('year'),
                 'mes_fin' => $addMonth->format('m'),
                 'anio_fin' => $addMonth->format('Y'),
                 'mes_inicio_pa' => $startPa->format('m'),
                 'anio_inicio_pa' => $startPa->format('Y'),
                 'mes_fin_pa' => $endMonth->format('m'),
                 'anio_fin_pa' => $endMonth->format('Y'),
-                'numero_dias' => $endMonth->format('Y'),
+                'numero_dias' => $request->get('countDays'),
                 'activo' => 'A'
             ]);
 
-            $criterion = $criterion->id_criterio;
+            $criterion = $getCriterion->id_criterio;
+
+            // Se trae lista de rubros
+
+            $entry = Entry::where('estado', 'A')->orderBy('id_rubro', 'desc')->get();
+
+            foreach ($entry as $value) {
+
+                Value::create([
+                    'id_criterio' => $getCriterion->id_criterio,
+                    'id_rubro' => $value->id_rubro,
+                    'valor_pp' => '0',
+                    'valor_pa' => '0',
+                    'estado' => 'A'
+                ]);
+            }
+
+            $value = Value::where('id_criterio')->first();
+
+        } else {
+            $criterion = $exist->id_criterio;
         }
 
 
@@ -131,14 +157,14 @@ class DataEntryController extends Controller
             ->leftJoin('tbl_valores', 'tbl_valores.id_rubro', '=', 'tbl_rubros.id_rubro')
             ->get();
 
-        if($values->isEmpty()) {
+        /*if($values->isEmpty()) {
             $values = Entry::select('tbl_rubros.id_rubro as id','descripcion as description', 'nemonico as name',
                 'edita_pp as previousEdit', 'edita_pa as currentEdit', 'notas as note')
                 ->where([
                     'tbl_rubros.estado' => 'A',
                 ])
                 ->get();
-        }
+        }*/
 
         return response()->json([
             'values' => $values,
@@ -149,34 +175,12 @@ class DataEntryController extends Controller
 
     public function addValues(Request $request) {
 
-
-        $value = Value::where('id_criterio')->first();
-
-        if(!$value) {
-            foreach ($request->get('values') as $value) {
-
-                Value::create([
-                    'id_criterio' => $request->get('criterion'),
-                    'id_rubro' => $value['id'],
-                    'valor_pp' => $value['currentPeriod'],
-                    'valor_pa' => $value['previousPeriod'],
-                    'estado' => 'A'
-                ]);
-            }
-        } else {
-
-            foreach ($request->get('values') as $value) {
-
-                $values = Value::where('id_criterio', $request->get('criterion'))
-                    ->where('id_criterio', $value['id'])
-                    ->first();
-
-                $values->valor_pp = $value['currentPeriod'];
-                $values->valor_pa = $value['previousPeriod'];
-                $values->save();
-            }
-        }
-
+        $values = Value::where('id_criterio', $request->get('criterion'))
+        ->where('id_rubro', $request->get('value'))
+        ->update([
+            'valor_pp' => $request->get('previousPeriod'),
+            'valor_pa' => $request->get('currentPeriod'),
+        ]);
 
         return response()->json([
             'status' => '200',
