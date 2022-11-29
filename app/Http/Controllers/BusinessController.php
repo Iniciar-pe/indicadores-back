@@ -99,15 +99,77 @@ class BusinessController extends Controller
         return Business::orderBy('id_empresa', 'desc')->first();
     }
 
-    public function getBusiness(Request $request)
-    {
+    public function getBusiness(Request $request) {
+
+        $default = \App\Models\LicenseDistribution::select('id_usuario as user', 'id_empresa as business', 'id_usuario_asignado as id')
+            ->where('id_usuario_asignado', auth()->user()->id_usuario)
+            ->where('estado', 'A')
+            ->get();
+
+        $lisence = \App\Models\LicenseDistribution::select('id_usuario as user', 'id_empresa as business', 'id_usuario_asignado as id')
+            ->where('id_usuario_asignado', auth()->user()->id_usuario)
+            ->where('estado', 'A')
+            ->first();
+
+
+        $business = \App\Models\Business::select('id_empresa as id', 'nombre_empresa as name', 'ruc',
+            'id_empresa_padre as chill', 'tipo_empresa as type', 'id_usuario as user')
+            ->where('id_usuario', $lisence->user)
+            ->where('estado', 'A')
+            ->where(function ($q) {
+                $q->where('tipo_empresa', '1')->orWhere('tipo_empresa', '2');
+            })
+            ->orderBy('id_empresa', 'asc')
+            ->get();
+
+        $array = [];
+        $e = 0;
+        foreach ($business as $key => $value){
+            $bu = new \stdClass();
+            $bu->id = $value->id;
+            $bu->name = $value->name;
+            $bu->ruc = $value->ruc;
+            $bu->chill = $value->chill;
+            $bu->type = $value->type;
+            $bu->user = $value->user;
+
+            $array[$e] = $bu;
+            $e++;
+
+            if($value->type == '2') {
+
+                $businessChild = \App\Models\Business::select('id_empresa as id', 'nombre_empresa as name', 'ruc',
+                    'id_empresa_padre as chill', 'tipo_empresa as type', 'id_usuario as user')
+                    //->where('id_usuario', $lisence->user)
+                    ->where('id_empresa_padre',  $value->id)
+                    ->where('estado', 'A')
+                    ->orderBy('id_empresa', 'asc')
+                    ->get();
+
+                foreach ($businessChild as $i => $values){
+                    $bus = new \stdClass();
+                    $bus->id = $values->id;
+                    $bus->name = '  '.$values->name;
+                    $bus->ruc = $values->ruc;
+                    $bus->chill = $values->chill;
+                    $bus->type = $values->type;
+                    $bus->user = $values->user;
+
+                    $array[$e] = $bus;
+                    $e++;
+                }
+
+            }
+
+
+        }
+
+
+
         return response()->json([
             'status' => '200',
-            'business' => Business::select('id_empresa as id', 'nombre_empresa as name', 'ruc', 'id_empresa_padre as chill')
-                ->where('id_usuario', auth()->user()->id_usuario)
-                ->where('estado', 'A')
-                ->orderBy('id_empresa', 'asc')
-                ->get(),
+            'business' => $array,
+            'default' => $default,
         ], 200);
     }
 

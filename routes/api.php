@@ -123,9 +123,10 @@ Route::group([
     'middleware' => 'api',
     'prefix' => 'entry-data'
 ], function ($router) {
-    Route::get('get',[App\Http\Controllers\DataEntryController::class,'getEntryData']);
+    Route::post('get',[App\Http\Controllers\DataEntryController::class,'getEntryData']);
     Route::post('add',[App\Http\Controllers\DataEntryController::class,'addEntryData']);
     Route::get('get-values',[App\Http\Controllers\DataEntryController::class,'getVelues']);
+    Route::post('add-values',[App\Http\Controllers\DataEntryController::class,'addValues']);
 });
 
 
