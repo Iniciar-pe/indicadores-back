@@ -21,6 +21,7 @@ class Business extends Model
         'ruc',
         'tipo_empresa',
         'id_empresa_padre',
+        'empresa_defecto',
         'estado'
     ];
 

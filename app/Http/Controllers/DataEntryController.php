@@ -10,6 +10,8 @@ use App\Models\Criterion;
 use App\Models\Entry;
 use App\Models\Value;
 use Carbon\Carbon;
+use App\Models\Business;
+use DB;
 
 class DataEntryController extends Controller
 {
@@ -146,16 +148,33 @@ class DataEntryController extends Controller
 
     public function getVelues(Request $request) {
 
-        $response = '';
+        $criterion = Criterion::select('id_empresa')->where('id_criterio', $request->get('criterion'))->first();
 
-        $values = Entry::select('tbl_rubros.id_rubro as id','descripcion as description', 'nemonico as name',
-             'valor_pp as currentPeriod', 'valor_pa as previousPeriod', 'edita_pp as previousEdit', 'edita_pa as currentEdit', 'notas as note')
+        $business = Business::select('tipo_empresa')->where('id_empresa', $criterion->id_empresa)->first();
+
+        if ($business->tipo_empresa == '2') {
+
+            $values = DB::select('select  id_criterio,tbl_rubros.id_rubro as id, sum(valor_pp) as previousPeriod, sum(valor_pa) as currentPeriod,
+                descripcion as description, nemonico as name, edita_pp as previousEdit, edita_pa as currentEdit, notas as note
+                from    tbl_valores
+                INNER JOIN tbl_rubros on tbl_rubros.id_rubro = tbl_valores.id_rubro
+                where  id_criterio = '.$request->get('criterion').'
+                group by tbl_rubros.id_rubro order by tbl_rubros.id_rubro');
+
+
+        } else {
+            $values = Entry::select('tbl_rubros.id_rubro as id','descripcion as description', 'nemonico as name',
+                'valor_pp as previousPeriod', 'valor_pa as currentPeriod', 'edita_pp as previousEdit', 'edita_pa as currentEdit', 'notas as note')
             ->where([
                 'tbl_rubros.estado' => 'A',
                 'tbl_valores.id_criterio' =>  $request->get('criterion'),
             ])
             ->leftJoin('tbl_valores', 'tbl_valores.id_rubro', '=', 'tbl_rubros.id_rubro')
             ->get();
+        }
+
+
+
 
         /*if($values->isEmpty()) {
             $values = Entry::select('tbl_rubros.id_rubro as id','descripcion as description', 'nemonico as name',

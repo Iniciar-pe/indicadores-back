@@ -101,7 +101,7 @@ class BusinessController extends Controller
 
     public function getBusiness(Request $request) {
 
-        $default = \App\Models\LicenseDistribution::select('id_usuario as user', 'id_empresa as business', 'id_usuario_asignado as id')
+        $default = \App\Models\LicenseDistribution::select('id_usuario as user', 'id_empresa as business', 'id_usuario_asignado as id', 'empresa_defecto as default')
             ->where('id_usuario_asignado', auth()->user()->id_usuario)
             ->where('estado', 'A')
             ->get();
