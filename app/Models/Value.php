@@ -18,7 +18,9 @@ class Value extends Model
         'id_rubro',
         'valor_pp',
         'valor_pa',
-        'estado'
+        'estado',
+        'id_empresa',
+        'id_usuario'
     ];
 
     protected $attributes = [
