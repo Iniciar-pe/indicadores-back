@@ -10,6 +10,8 @@ use App\Models\Criterion;
 use App\Models\Entry;
 use App\Models\Value;
 use Carbon\Carbon;
+use App\Models\Business;
+use DB;
 
 class DataEntryController extends Controller
 {
@@ -115,24 +117,51 @@ class DataEntryController extends Controller
             $criterion = $getCriterion->id_criterio;
 
             // Se trae lista de rubros
+            //if ($request->get('type') == '1') {
+                $entry = Entry::where('estado', 'A')->orderBy('id_rubro', 'desc')->get();
 
-            $entry = Entry::where('estado', 'A')->orderBy('id_rubro', 'desc')->get();
+                foreach ($entry as $value) {
 
-            foreach ($entry as $value) {
+                    Value::create([
+                        'id_criterio' => $getCriterion->id_criterio,
+                        'id_rubro' => $value->id_rubro,
+                        'id_empresa' => $request->get('business'),
+                        'id_usuario' => auth()->user()->id_usuario,
+                        'valor_pp' => '0',
+                        'valor_pa' => '0',
+                        'estado' => 'A'
+                    ]);
+                }
+            //}
 
-                Value::create([
-                    'id_criterio' => $getCriterion->id_criterio,
-                    'id_rubro' => $value->id_rubro,
-                    'valor_pp' => '0',
-                    'valor_pa' => '0',
-                    'estado' => 'A'
-                ]);
+
+            if ($request->get('type') == '2') {
+                $entry = Entry::where('estado', 'A')->orderBy('id_rubro', 'desc')->get();
+                $business = Business::select('tipo_empresa', 'id_empresa')->where('id_empresa_padre', $request->get('business'))->get();
+
+                foreach ($business as $emp) {
+                    foreach ($entry as $value) {
+                        Value::create([
+                            'id_criterio' => $getCriterion->id_criterio,
+                            'id_rubro' => $value->id_rubro,
+                            'id_empresa' => $emp->id_empresa,
+                            'id_usuario' => auth()->user()->id_usuario,
+                            'valor_pp' => '0',
+                            'valor_pa' => '0',
+                            'estado' => 'A'
+                        ]);
+                    }
+                }
+
             }
 
-            $value = Value::where('id_criterio')->first();
-
         } else {
+
+
             $criterion = $exist->id_criterio;
+
+
+
         }
 
 
@@ -146,16 +175,82 @@ class DataEntryController extends Controller
 
     public function getVelues(Request $request) {
 
-        $response = '';
+        // $criterion = Criterion::select('id_empresa')->where('id_criterio', $request->get('c'))->first();
 
-        $values = Entry::select('tbl_rubros.id_rubro as id','descripcion as description', 'nemonico as name',
-             'valor_pp as currentPeriod', 'valor_pa as previousPeriod', 'edita_pp as previousEdit', 'edita_pa as currentEdit', 'notas as note')
+
+
+        if($request->get('c')) {
+
+            $business = Business::select('tbl_empresas.tipo_empresa', 'tbl_distribucion_licencias.id_usuario')->where([
+                'tbl_empresas.id_empresa' => $request->get('b'),
+                'id_usuario_asignado' => auth()->user()->id_usuario,
+                ])
+                ->join('tbl_distribucion_licencias', function ($join) {
+                    $join->on('tbl_distribucion_licencias.id_empresa', '=', 'tbl_empresas.id_empresa')
+                        ->orOn('tbl_distribucion_licencias.id_usuario', '=', 'tbl_empresas.id_usuario');
+                })
+                ->first();
+
+            if ($business->tipo_empresa == '2') {
+
+                $bu = DB::select('select  id_criterio,tbl_rubros.id_rubro as id, sum(valor_pp) as previousPeriod, sum(valor_pa) as currentPeriod,
+                    descripcion as description, nemonico as name, edita_pp as previousEdit, edita_pa as currentEdit, notas as note,
+                    tbl_valores.id_empresa as business
+                    from    tbl_valores
+                    INNER JOIN tbl_rubros on tbl_rubros.id_rubro = tbl_valores.id_rubro
+                    Inner join tbl_empresas on tbl_empresas.id_empresa = tbl_valores.id_empresa
+                    where  id_criterio = '.$request->get('c').' and tbl_empresas.tipo_empresa = "3"
+                    group by tbl_rubros.id_rubro order by tbl_rubros.id_rubro');
+
+                foreach ($bu as $value) {
+                    $va = Value::where([
+                        'id_criterio' => $request->get('c'),
+                        'id_rubro' => $value->id,
+                        'id_empresa' => $request->get('b')
+                    ])
+                    ->update([
+                        'valor_pp' => $value->previousPeriod,
+                        'valor_pa' => $value->currentPeriod,
+                    ]);
+                }
+
+            }
+
+            $values = Entry::select('tbl_rubros.id_rubro as id','descripcion as description', 'nemonico as name',
+                'valor_pp as previousPeriod', 'valor_pa as currentPeriod', 'edita_pp as previousEdit', 'edita_pa as currentEdit', 'notas as note')
             ->where([
                 'tbl_rubros.estado' => 'A',
-                'tbl_valores.id_criterio' =>  $request->get('criterion'),
+                'tbl_valores.id_criterio' =>  $request->get('c'),
+                'tbl_valores.id_empresa' => $request->get('b'),
+                'tbl_valores.id_usuario' => $business->id_usuario,
             ])
             ->leftJoin('tbl_valores', 'tbl_valores.id_rubro', '=', 'tbl_rubros.id_rubro')
+            ->orderBy('tbl_rubros.id_rubro')
             ->get();
+
+        } else {
+            $values = [];
+        }
+
+
+
+        /*if ($business->tipo_empresa == '2') {
+
+            $values = DB::select('select  id_criterio,tbl_rubros.id_rubro as id, sum(valor_pp) as previousPeriod, sum(valor_pa) as currentPeriod,
+                descripcion as description, nemonico as name, edita_pp as previousEdit, edita_pa as currentEdit, notas as note
+                from    tbl_valores
+                INNER JOIN tbl_rubros on tbl_rubros.id_rubro = tbl_valores.id_rubro
+                Inner join tbl_empresas on tbl_empresas.id_empresa = tbl_valores.id_empresa
+                where  id_criterio = '.$request->get('c').' and tbl_empresas.tipo_empresa = "3"
+                group by tbl_rubros.id_rubro order by tbl_rubros.id_rubro');
+
+
+        } else {*/
+
+        //}
+
+
+
 
         /*if($values->isEmpty()) {
             $values = Entry::select('tbl_rubros.id_rubro as id','descripcion as description', 'nemonico as name',
@@ -176,7 +271,10 @@ class DataEntryController extends Controller
     public function addValues(Request $request) {
 
         $values = Value::where('id_criterio', $request->get('criterion'))
-        ->where('id_rubro', $request->get('value'))
+        ->where([
+            'id_rubro' => $request->get('value'),
+            'id_empresa' => $request->get('business')
+        ])
         ->update([
             'valor_pp' => $request->get('previousPeriod'),
             'valor_pa' => $request->get('currentPeriod'),
