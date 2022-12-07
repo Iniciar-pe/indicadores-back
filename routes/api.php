@@ -129,6 +129,16 @@ Route::group([
     Route::post('add-values',[App\Http\Controllers\DataEntryController::class,'addValues']);
 });
 
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'ratios'
+], function ($router) {
+    Route::post('get',[App\Http\Controllers\IndicatorController::class,'getRatios']);
+    Route::post('add',[App\Http\Controllers\DataEntryController::class,'addEntryData']);
+    Route::get('get-values',[App\Http\Controllers\DataEntryController::class,'getVelues']);
+    Route::post('add-values',[App\Http\Controllers\DataEntryController::class,'addValues']);
+});
+
 
 
 /*Route::group([

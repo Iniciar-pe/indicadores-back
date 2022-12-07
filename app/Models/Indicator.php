@@ -26,7 +26,7 @@ class Indicator extends Model
         'expresado',
         'estado',
         'icono',
-
+        'detalle_resultado'
     ];
 
     protected $attributes = [

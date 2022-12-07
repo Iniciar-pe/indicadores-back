@@ -276,8 +276,8 @@ class DataEntryController extends Controller
             'id_empresa' => $request->get('business')
         ])
         ->update([
-            'valor_pp' => $request->get('previousPeriod'),
-            'valor_pa' => $request->get('currentPeriod'),
+            'valor_pp' => $request->get('previousPeriod') ? $request->get('previousPeriod') : 0,
+            'valor_pa' => $request->get('currentPeriod') ? $request->get('currentPeriod') : 0,
         ]);
 
         return response()->json([

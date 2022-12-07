@@ -19,7 +19,7 @@ class IndicatorController extends Controller
     {
         return response()->json([
             'status' => '200',
-            'indicator' => Indicator::orderBy('id_indicador', 'desc')->get(),
+            'indicator' => Indicator::orderBy('orden', 'asc')->get(),
             'template' => Template::orderBy('id_plantilla', 'desc')->get()
         ], 200);
     }
@@ -56,6 +56,7 @@ class IndicatorController extends Controller
             'expresado' => $request->get('expressed'),
             'estado' => $request->get('status'),
             'tipo' => $request->get('type'),
+            'detalle_resultado' => $request->get('detalle_resultado'),
         ]);
 
         return response()->json([
@@ -94,6 +95,7 @@ class IndicatorController extends Controller
         $indicador->expresado = $request->get('expressed');
         $indicador->estado = $request->get('status');
         $indicador->tipo = $request->get('type');
+        $indicador->detalle_resultado = $request->get('detalle_resultado');
         $indicador->save();
 
         return response()->json([
@@ -139,6 +141,43 @@ class IndicatorController extends Controller
 
     private function idTemplate() {
         return Template::where('pdefault', 'S')->first();
+    }
+
+    public function getRatios(Request $request) {
+
+        $default = \App\Models\LicenseDistribution::select('tbl_distribucion_licencias.id_usuario as user',
+        'tbl_distribucion_licencias.id_empresa as business', 'id_criterio as id', 'empresa_defecto as default',
+        'mes_inicio as startMonth', 'anio_inicio as startYear', 'mes_fin as endMonth', 'anio_fin as endYear',
+        'mes_inicio_pa as startMonthPrevious', 'anio_inicio_pa as startYearPrevious', 'mes_fin_pa as endMonthPrevious', 'anio_fin_pa as endYearPrevious',
+        'id_periodo as period', 'numero_dias as countDays', 'simbolo as symbol')
+            ->where([
+                'id_usuario_asignado' => auth()->user()->id_usuario,
+                'tbl_distribucion_licencias.id_empresa' => $request->get('business'),
+                'tbl_distribucion_licencias.estado' => 'A'
+            ])
+            ->join('tbl_criterios', function ($join) {
+                $join->on('tbl_criterios.id_empresa', '=', 'tbl_distribucion_licencias.id_empresa')
+                    ->orOn('tbl_criterios.id_usuario', '=', 'tbl_distribucion_licencias.id_usuario');
+            })
+            ->join('tbl_monedas', 'tbl_monedas.id_moneda', '=', 'tbl_criterios.id_moneda')
+            ->first();
+
+        $ratios = Indicator::select('id_resultado as id', 'nombre as name', 'descripcion as description', 'tbl_resultados.formula',
+        'resultado as result', 'valores as value')
+        ->where([
+            'tbl_resultados.id_criterio' => $default->id,
+            'tbl_resultados.id_usuario' => $default->user,
+            'tbl_resultados.id_empresa' => $request->get('business')
+        ])
+        ->join('tbl_resultados', 'tbl_resultados.id_indicador', '=', 'tbl_indicadores.id_indicador')
+        ->get();
+
+        return response()->json([
+            'status' => '200',
+            'default' => $default,
+            'ratios' => $ratios
+        ], 200);
+
     }
 
 }

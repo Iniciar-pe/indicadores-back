@@ -42,7 +42,7 @@ class EntryController extends Controller
             'estado' => $request->get('status'),
             'edita_pp' => $request->get('edita_pp'),
             'edita_pa' => $request->get('edita_pa'),
-            'nota' => $request->get('nota'),
+            'notas' => $request->get('note'),
         ]);
 
         return response()->json([
@@ -70,7 +70,7 @@ class EntryController extends Controller
         $entry->estado = $request->get('status');
         $entry->edita_pp = $request->get('edita_pp');
         $entry->edita_pa = $request->get('edita_pa');
-        $entry->nota = $request->get('nota');
+        $entry->notas = $request->get('notas');
         $entry->save();
 
         return response()->json([
