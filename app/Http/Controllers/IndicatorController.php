@@ -163,13 +163,15 @@ class IndicatorController extends Controller
             ->first();
 
         $ratios = Indicator::select('id_resultado as id', 'nombre as name', 'descripcion as description', 'tbl_resultados.formula',
-        'resultado as result', 'valores as value')
+        'resultado as result', 'valores as value', 'detalle_resultado as detailResult')
         ->where([
             'tbl_resultados.id_criterio' => $default->id,
             'tbl_resultados.id_usuario' => $default->user,
-            'tbl_resultados.id_empresa' => $request->get('business')
+            'tbl_resultados.id_empresa' => $request->get('business'),
+            'tipo' => $request->get('type')
         ])
         ->join('tbl_resultados', 'tbl_resultados.id_indicador', '=', 'tbl_indicadores.id_indicador')
+        ->orderBy('orden', 'asc')
         ->get();
 
         return response()->json([
