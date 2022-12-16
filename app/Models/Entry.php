@@ -21,7 +21,8 @@ class Entry extends Model
         'estado',
         'edita_pp',
         'edita_pa',
-        'notas'
+        'notas',
+        'orden'
     ];
 
     protected $attributes = [

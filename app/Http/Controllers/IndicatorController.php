@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\Indicator;
 use App\Models\Template;
+use App\Models\LicenseDistribution;
 
 class IndicatorController extends Controller
 {
@@ -145,6 +146,25 @@ class IndicatorController extends Controller
 
     public function getRatios(Request $request) {
 
+        $template = LicenseDistribution::where([
+            'id_usuario_asignado' => auth()->user()->id_usuario,
+            'id_empresa' => $request->get('business'),
+        ])->first();
+
+        LicenseDistribution::where([
+            'id_usuario' => $template->id_usuario,
+            'id_usuario_asignado' => auth()->user()->id_usuario,
+        ])->update([
+            'empresa_defecto' => 'N',
+        ]);
+
+        LicenseDistribution::where([
+            'id_usuario_asignado' => auth()->user()->id_usuario,
+            'id_empresa' => $request->get('business'),
+        ])->update([
+            'empresa_defecto' => 'S',
+        ]);
+
         $default = \App\Models\LicenseDistribution::select('tbl_distribucion_licencias.id_usuario as user',
         'tbl_distribucion_licencias.id_empresa as business', 'id_criterio as id', 'empresa_defecto as default',
         'mes_inicio as startMonth', 'anio_inicio as startYear', 'mes_fin as endMonth', 'anio_fin as endYear',
@@ -153,13 +173,14 @@ class IndicatorController extends Controller
             ->where([
                 'id_usuario_asignado' => auth()->user()->id_usuario,
                 'tbl_distribucion_licencias.id_empresa' => $request->get('business'),
-                'tbl_distribucion_licencias.estado' => 'A'
+                'tbl_criterios.activo' => 'A',
             ])
             ->join('tbl_criterios', function ($join) {
                 $join->on('tbl_criterios.id_empresa', '=', 'tbl_distribucion_licencias.id_empresa')
-                    ->orOn('tbl_criterios.id_usuario', '=', 'tbl_distribucion_licencias.id_usuario');
+                    ->on('tbl_criterios.id_usuario', '=', 'tbl_distribucion_licencias.id_usuario');
             })
             ->join('tbl_monedas', 'tbl_monedas.id_moneda', '=', 'tbl_criterios.id_moneda')
+            ->orderBy('tbl_criterios.id_criterio', 'desc')
             ->first();
 
         $ratios = Indicator::select('id_resultado as id', 'nombre as name', 'descripcion as description', 'tbl_resultados.formula',
