@@ -31,10 +31,10 @@ class IndicatorController extends Controller
             'description' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:1',
-            'formula' => 'required|string|max:255',
+            'formula' => 'required|string|max:490',
             'public' => 'required|string|max:1',
             //'id_payroll' => 'required|integer|max:11',
-            'order' => 'required|integer|max:50',
+            'order' => 'required|integer',
             'expressed' => 'required|string|max:1',
             'status' => 'required|string|max:1',
         ]);
@@ -57,6 +57,8 @@ class IndicatorController extends Controller
             'expresado' => $request->get('expressed'),
             'estado' => $request->get('status'),
             'tipo' => $request->get('type'),
+            'formula_mostrar' => $request->get('view'),
+            'nemonico' => $request->get('nemonico'),
             'detalle_resultado' => $request->get('detalle_resultado'),
         ]);
 
@@ -73,10 +75,10 @@ class IndicatorController extends Controller
             'description' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:1',
-            'formula' => 'required|string|max:255',
+            'formula' => 'required|string|max:490',
             'public' => 'required|string|max:1',
             //'id_payroll' => 'required|integer|max:11',
-            'order' => 'required|integer|max:50',
+            'order' => 'required|integer',
             'expressed' => 'required|string|max:1',
             'status' => 'required|string|max:1',
         ]);
@@ -96,9 +98,10 @@ class IndicatorController extends Controller
         $indicador->expresado = $request->get('expressed');
         $indicador->estado = $request->get('status');
         $indicador->tipo = $request->get('type');
-        $indicador->detalle_resultado = $request->get('detalle_resultado');
+        $indicador->formula_mostrar = $request->get('view');
+        $indicador->tipo = $request->get('type');
+        $indicador->nemonico = $request->get('nemonico');
         $indicador->save();
-
         return response()->json([
             'status' => '200',
             'message' => 'Updated record correctly',

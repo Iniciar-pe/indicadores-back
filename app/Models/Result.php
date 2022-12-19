@@ -21,7 +21,9 @@ class Result extends Model
         'id_empresa',
         'resultado',
         'valores',
-        'formula'
+        'formula',
+        'formula_descifrada',
+        'validacion_formula'
     ];
 
 

@@ -127,6 +127,7 @@ Route::group([
     Route::post('add',[App\Http\Controllers\DataEntryController::class,'addEntryData']);
     Route::get('get-values',[App\Http\Controllers\DataEntryController::class,'getVelues']);
     Route::post('add-values',[App\Http\Controllers\DataEntryController::class,'addValues']);
+    Route::post('run',[App\Http\Controllers\RunProcess::class,'run']);
 });
 
 Route::group([

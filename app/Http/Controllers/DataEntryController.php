@@ -130,7 +130,7 @@ class DataEntryController extends Controller
                 'anio_inicio_pa' => $startMonthPeriod->format('Y'),
                 'mes_fin_pa' => $endMonthPeriod->format('m'),
                 'anio_fin_pa' => $endMonthPeriod->format('Y'),
-                'numero_dias' => $request->get('countDays'),
+                'numero_dias' => $request->get('countDays') + 1,
                 'activo' => 'A'
             ]);
 

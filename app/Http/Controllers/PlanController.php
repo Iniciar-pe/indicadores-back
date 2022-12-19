@@ -36,7 +36,7 @@ class PlanController extends Controller
         }
 
         $id_plan = $this->incrementingPlan();
-        
+
         $plan = Plan::create([
             'id_plan' => $id_plan ? $id_plan->id_plan + 1 : '1',
             'descripcion' => $request->get('description'),
@@ -57,8 +57,8 @@ class PlanController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'description' => 'required|string|max:255',
-            'number' => 'required|integer|max:11',
-            'price' => 'required|string|max:6',
+            // 'number' => 'required|integer|max:11',
+            // 'price' => 'required|string|max:6',
             'type' => 'required|string|max:1',
             'status' => 'required|string|max:1',
         ]);
@@ -69,8 +69,8 @@ class PlanController extends Controller
 
         $plan = Plan::find($request->get('id'));
         $plan->descripcion = $request->get('description');
-        $plan->numero = $request->get('number');
-        $plan->precio = $request->get('price');
+        // $plan->numero = $request->get('number');
+        // $plan->precio = $request->get('price');
         $plan->tipo = $request->get('type');
         $plan->estado = $request->get('status');
         $plan->save();
@@ -92,7 +92,7 @@ class PlanController extends Controller
         ], 200);
     }
 
-    private function incrementingPlan() 
+    private function incrementingPlan()
     {
         return Plan::orderBy('id_plan', 'desc')->first();
     }
