@@ -17,7 +17,7 @@ class EntryController extends Controller
     {
         return response()->json([
             'status' => '200',
-            'entry' => Entry::orderBy('id_rubro', 'desc')->get(),
+            'entry' => Entry::orderBy('orden', 'asc')->get(),
         ], 200);
     }
 
@@ -42,7 +42,9 @@ class EntryController extends Controller
             'estado' => $request->get('status'),
             'edita_pp' => $request->get('edita_pp'),
             'edita_pa' => $request->get('edita_pa'),
-            'nota' => $request->get('nota'),
+            'notas' => $request->get('note'),
+            'orden' => $request->get('orden'),
+
         ]);
 
         return response()->json([
@@ -70,7 +72,8 @@ class EntryController extends Controller
         $entry->estado = $request->get('status');
         $entry->edita_pp = $request->get('edita_pp');
         $entry->edita_pa = $request->get('edita_pa');
-        $entry->nota = $request->get('nota');
+        $entry->notas = $request->get('notas');
+        $entry->orden = $request->get('orden');
         $entry->save();
 
         return response()->json([

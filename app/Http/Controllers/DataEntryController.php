@@ -11,6 +11,7 @@ use App\Models\Entry;
 use App\Models\Value;
 use Carbon\Carbon;
 use App\Models\Business;
+use App\Models\LicenseDistribution;
 use DB;
 
 class DataEntryController extends Controller
@@ -22,6 +23,26 @@ class DataEntryController extends Controller
 
     public function getEntryData(Request $request)
     {
+
+        $template = LicenseDistribution::where([
+            'id_usuario_asignado' => auth()->user()->id_usuario,
+            'id_empresa' => $request->get('id'),
+        ])->first();
+
+        LicenseDistribution::where([
+            'id_usuario' => $template->id_usuario,
+            'id_usuario_asignado' => auth()->user()->id_usuario,
+        ])->update([
+            'empresa_defecto' => 'N',
+        ]);
+
+        LicenseDistribution::where([
+            'id_usuario_asignado' => auth()->user()->id_usuario,
+            'id_empresa' => $request->get('id'),
+        ])->update([
+            'empresa_defecto' => 'S',
+        ]);
+
 
         $periodo = PeriodCalculation::select('id_periodo as id', 'nombre_periodo as name', 'estado as status', 'cantidad_meses as count')
             ->where('estado', 'A')
@@ -76,7 +97,6 @@ class DataEntryController extends Controller
             'id_usuario' => auth()->user()->id_usuario,
             'id_empresa' => $request->get('business'),
             'id_periodo' => $request->get('period'),
-            //'id_moneda' => $request->get('currency'),
             'mes_inicio' => $request->get('month'),
             'anio_inicio' => $request->get('year'),
         ])->first();
@@ -85,39 +105,44 @@ class DataEntryController extends Controller
 
         if(!$exist) {
 
-            $period = PeriodCalculation::where('id_periodo', $request->get('period'))->first();
+            $startMonth = Carbon::parse($request->get('startMonth'));
+            $endMonth = Carbon::parse($request->get('endMonth'));
+            $startMonthPeriod = Carbon::parse($request->get('startMonthPeriod'));
+            $endMonthPeriod = Carbon::parse($request->get('endMonthPeriod'));
 
-            $date = Carbon::parse($request->get('year').'-'.$request->get('month').'-01');
-            $addMonth = $date->addMonths($period->cantidad_meses);
-
-            $dateStart = Carbon::parse($request->get('year').'-'.$request->get('month').'-01');
-            $startPa = $dateStart->subMonths($period->cantidad_meses +1);
-
-            $endPa = Carbon::parse($request->get('year').'-'.$request->get('month').'-01');
-            $endMonth = $endPa->subMonth();
-
+            Criterion::where([
+                'id_usuario' => auth()->user()->id_usuario,
+                'id_empresa' => $request->get('business'),
+            ])->update([
+                'activo' => 'I',
+            ]);
 
             $getCriterion = Criterion::create([
                 'id_usuario' => auth()->user()->id_usuario,
                 'id_empresa' => $request->get('business'),
                 'id_periodo' => $request->get('period'),
                 'id_moneda' => $request->get('currency'),
-                'mes_inicio' => $request->get('month'),
-                'anio_inicio' => $request->get('year'),
-                'mes_fin' => $addMonth->format('m'),
-                'anio_fin' => $addMonth->format('Y'),
-                'mes_inicio_pa' => $startPa->format('m'),
-                'anio_inicio_pa' => $startPa->format('Y'),
-                'mes_fin_pa' => $endMonth->format('m'),
-                'anio_fin_pa' => $endMonth->format('Y'),
-                'numero_dias' => $request->get('countDays'),
+                'mes_inicio' => $startMonth->format('m'),
+                'anio_inicio' => $startMonth->format('Y'),
+                'mes_fin' => $endMonth->format('m'),
+                'anio_fin' => $endMonth->format('Y'),
+                'mes_inicio_pa' => $startMonthPeriod->format('m'),
+                'anio_inicio_pa' => $startMonthPeriod->format('Y'),
+                'mes_fin_pa' => $endMonthPeriod->format('m'),
+                'anio_fin_pa' => $endMonthPeriod->format('Y'),
+                'numero_dias' => $request->get('countDays') + 1,
                 'activo' => 'A'
             ]);
 
             $criterion = $getCriterion->id_criterio;
 
+            $value = Value::where([
+                'id_criterio' => $getCriterion->id_criterio,
+                'id_empresa' => $request->get('business'),
+                'id_usuario' => auth()->user()->id_usuario,
+            ])->first();
             // Se trae lista de rubros
-            //if ($request->get('type') == '1') {
+            if(!$value) {
                 $entry = Entry::where('estado', 'A')->orderBy('id_rubro', 'desc')->get();
 
                 foreach ($entry as $value) {
@@ -132,35 +157,51 @@ class DataEntryController extends Controller
                         'estado' => 'A'
                     ]);
                 }
+
+                if ($request->get('type') == '2') {
+                    $entry = Entry::where('estado', 'A')->orderBy('id_rubro', 'desc')->get();
+                    $business = Business::select('tipo_empresa', 'id_empresa')->where('id_empresa_padre', $request->get('business'))->get();
+
+                    foreach ($business as $emp) {
+                        foreach ($entry as $value) {
+                            Value::create([
+                                'id_criterio' => $getCriterion->id_criterio,
+                                'id_rubro' => $value->id_rubro,
+                                'id_empresa' => $emp->id_empresa,
+                                'id_usuario' => auth()->user()->id_usuario,
+                                'valor_pp' => '0',
+                                'valor_pa' => '0',
+                                'estado' => 'A'
+                            ]);
+                        }
+                    }
+
+                }
+            }
+
             //}
 
 
-            if ($request->get('type') == '2') {
-                $entry = Entry::where('estado', 'A')->orderBy('id_rubro', 'desc')->get();
-                $business = Business::select('tipo_empresa', 'id_empresa')->where('id_empresa_padre', $request->get('business'))->get();
 
-                foreach ($business as $emp) {
-                    foreach ($entry as $value) {
-                        Value::create([
-                            'id_criterio' => $getCriterion->id_criterio,
-                            'id_rubro' => $value->id_rubro,
-                            'id_empresa' => $emp->id_empresa,
-                            'id_usuario' => auth()->user()->id_usuario,
-                            'valor_pp' => '0',
-                            'valor_pa' => '0',
-                            'estado' => 'A'
-                        ]);
-                    }
-                }
-
-            }
 
         } else {
 
 
             $criterion = $exist->id_criterio;
 
+            Criterion::where([
+                'id_usuario' => auth()->user()->id_usuario,
+                'id_empresa' => $request->get('business'),
+            ])->update([
+                'activo' => 'I',
+            ]);
 
+
+            Criterion::where([
+                'id_criterio' => $criterion
+            ])->update([
+                'activo' => 'A',
+            ]);
 
         }
 
@@ -225,7 +266,7 @@ class DataEntryController extends Controller
                 'tbl_valores.id_usuario' => $business->id_usuario,
             ])
             ->leftJoin('tbl_valores', 'tbl_valores.id_rubro', '=', 'tbl_rubros.id_rubro')
-            ->orderBy('tbl_rubros.id_rubro')
+            ->orderBy('tbl_rubros.orden', 'asc')
             ->get();
 
         } else {
@@ -276,8 +317,8 @@ class DataEntryController extends Controller
             'id_empresa' => $request->get('business')
         ])
         ->update([
-            'valor_pp' => $request->get('previousPeriod'),
-            'valor_pa' => $request->get('currentPeriod'),
+            'valor_pp' => $request->get('previousPeriod') ? $request->get('previousPeriod') : 0,
+            'valor_pa' => $request->get('currentPeriod') ? $request->get('currentPeriod') : 0,
         ]);
 
         return response()->json([
