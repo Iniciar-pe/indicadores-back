@@ -101,6 +101,7 @@ class IndicatorController extends Controller
         $indicador->formula_mostrar = $request->get('view');
         $indicador->tipo = $request->get('type');
         $indicador->nemonico = $request->get('nemonico');
+        $indicador->detalle_resultado = $request->get('detalle_resultado');
         $indicador->save();
         return response()->json([
             'status' => '200',
@@ -187,7 +188,7 @@ class IndicatorController extends Controller
             ->first();
 
         $ratios = Indicator::select('id_resultado as id', 'nombre as name', 'descripcion as description', 'tbl_resultados.formula',
-        'resultado as result', 'valores as value', 'detalle_resultado as detailResult')
+        'resultado as result', 'valores as value', 'detalle_resultado as detailResult', 'expresado as voiced')
         ->where([
             'tbl_resultados.id_criterio' => $default->id,
             'tbl_resultados.id_usuario' => $default->user,
