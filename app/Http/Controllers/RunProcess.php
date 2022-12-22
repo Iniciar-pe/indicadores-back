@@ -18,6 +18,18 @@ class RunProcess extends Controller
     }
 
     public function run(Request $request) {
+
+        $criterion = Criterion::select('id_usuario as user', 'id_empresa as business', 'numero_dias as countDay')
+            ->where('id_criterio', $request->get('criterion'))->first();
+
+        $response = Result::select('id_criterio as id')
+        ->where([
+            'id_criterio' => $request->get('criterion'),
+            'id_usuario' => $criterion->user,
+            'id_empresa' => $criterion->business,
+        ])->delete();
+
+
         $array = [];
         // Obtenemos la lista de indicadores y criterio
         $indicators = Indicator::select('formula as formulate', 'id_indicador as indicator',
@@ -25,8 +37,7 @@ class RunProcess extends Controller
             ->where('estado', 'A')
             ->orderBy('orden', 'asc')
             ->get();
-        $criterion = Criterion::select('id_usuario as user', 'id_empresa as business', 'numero_dias as countDay')
-            ->where('id_criterio', $request->get('criterion'))->first();
+
 
         foreach ($indicators as $key => $value) {
             $entry = "";
@@ -96,37 +107,19 @@ class RunProcess extends Controller
                 $result = null;
             }
 
-            $response = Result::select('id_criterio as id')
-                ->where([
-                    'id_criterio' => $request->get('criterion'),
-                    'id_indicador' => $value->indicator,
-                    'id_usuario' => $criterion->user,
-                    'id_empresa' => $criterion->business,
-                ])->first();
 
-            if ($response) {
-                Result::where([
-                    'id_resultado' => $response->id_resultado,
-                ])->update([
-                    'resultado' => $result,
-                    'formula' => $value->viewFormulate,
-                    'formula_descifrada' => $value->formulate,
-                    'valores' => $entry,
-                    'validacion_formula' => $result ? 'O' : 'E'
-                ]);
-            } else {
-                Result::create([
-                    'id_criterio' => $request->get('criterion'),
-                    'id_indicador' => $value->indicator,
-                    'id_usuario' => $criterion->user,
-                    'id_empresa' => $criterion->business,
-                    'resultado' => $result,
-                    'formula' => $value->viewFormulate,
-                    'formula_descifrada' => $value->formulate,
-                    'valores' => $entry,
-                    'validacion_formula' => $result ? 'O' : 'E'
-                ]);
-            }
+            Result::create([
+                'id_criterio' => $request->get('criterion'),
+                'id_indicador' => $value->indicator,
+                'id_usuario' => $criterion->user,
+                'id_empresa' => $criterion->business,
+                'resultado' => $result,
+                'formula' => $value->viewFormulate,
+                'formula_descifrada' => $value->formulate,
+                'valores' => $entry,
+                'validacion_formula' => $result ? 'O' : 'E'
+            ]);
+
 
 
 

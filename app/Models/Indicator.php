@@ -28,7 +28,8 @@ class Indicator extends Model
         'icono',
         'detalle_resultado',
         'formula_mostrar',
-        'nemonico'
+        'nemonico',
+        'lista_variables'
     ];
 
     protected $attributes = [
