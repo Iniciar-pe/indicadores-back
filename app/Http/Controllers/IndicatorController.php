@@ -31,7 +31,7 @@ class IndicatorController extends Controller
             'description' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:1',
-            'formula' => 'required|string|max:490',
+            'formula' => 'required|string|max:1000',
             'public' => 'required|string|max:1',
             //'id_payroll' => 'required|integer|max:11',
             'order' => 'required|integer',
@@ -60,6 +60,7 @@ class IndicatorController extends Controller
             'formula_mostrar' => $request->get('view'),
             'nemonico' => $request->get('nemonico'),
             'detalle_resultado' => $request->get('detalle_resultado'),
+            'lista_variables' => $request->get('lista_variables'),
         ]);
 
         return response()->json([
@@ -75,7 +76,7 @@ class IndicatorController extends Controller
             'description' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:1',
-            'formula' => 'required|string|max:490',
+            'formula' => 'required|string|max:1000',
             'public' => 'required|string|max:1',
             //'id_payroll' => 'required|integer|max:11',
             'order' => 'required|integer',
@@ -102,6 +103,7 @@ class IndicatorController extends Controller
         $indicador->tipo = $request->get('type');
         $indicador->nemonico = $request->get('nemonico');
         $indicador->detalle_resultado = $request->get('detalle_resultado');
+        $indicador->lista_variables = $request->get('lista_variables');
         $indicador->save();
         return response()->json([
             'status' => '200',
@@ -188,7 +190,7 @@ class IndicatorController extends Controller
             ->first();
 
         $ratios = Indicator::select('id_resultado as id', 'nombre as name', 'descripcion as description', 'tbl_resultados.formula',
-        'resultado as result', 'valores as value', 'detalle_resultado as detailResult', 'expresado as voiced')
+        'resultado as result', 'valores as value', 'detalle_resultado as detailResult', 'expresado as voiced', 'validacion_formula as validate')
         ->where([
             'tbl_resultados.id_criterio' => $default->id,
             'tbl_resultados.id_usuario' => $default->user,
