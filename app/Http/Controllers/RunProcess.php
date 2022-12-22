@@ -22,32 +22,24 @@ class RunProcess extends Controller
         $criterion = Criterion::select('id_usuario as user', 'id_empresa as business', 'numero_dias as countDay')
             ->where('id_criterio', $request->get('criterion'))->first();
 
-        $response = Result::select('id_criterio as id')
+
+        Result::select('id_criterio as id')
         ->where([
             'id_criterio' => $request->get('criterion'),
             'id_usuario' => $criterion->user,
             'id_empresa' => $criterion->business,
         ])->delete();
 
-
-        $array = [];
         // Obtenemos la lista de indicadores y criterio
         $indicators = Indicator::select('formula as formulate', 'id_indicador as indicator',
-            'formula_mostrar as viewFormulate', 'expresado as expressed', 'nemonico as mnemonic')
+            'formula_mostrar as viewFormulate', 'expresado as expressed', 'nemonico as mnemonic',
+            'lista_variables as listValues')
             ->where('estado', 'A')
             ->orderBy('orden', 'asc')
             ->get();
 
 
         foreach ($indicators as $key => $value) {
-            $entry = "";
-
-            // Validamos si existe cantidad de dias periodo
-            $separatorVar = "VAR_DIAS_PERIODO";
-            if (preg_match("/{$separatorVar}/i", $value->formulate)) {
-                $value->formulate = str_replace('VAR_DIAS_PERIODO', $criterion->countDay, $value->formulate);
-                $entry .= 'Cantidad dias : ' . $criterion->countDay . ' <br>';
-            }
 
             // Validamos si va a usar variables de indicadores y la reemplzamos
             //if (strpos($value->formulate, 'RES_')) {
@@ -62,11 +54,6 @@ class RunProcess extends Controller
 
                     foreach ($response_result as $i => $result) {
                         $value->formulate = str_replace('RES_' . $result->mnemonic, $result->result, $value->formulate);
-                        $val[$i] = $value->formulate .'-'. $result->mnemonic;
-                        $separatorRes = 'RES_' . $result->mnemonic;
-                        if (preg_match("/{$separatorRes}/i", $value->formulate)) {
-                            $entry .= $result->name . ': ' . number_format($result->result, 2) . ' <br>';
-                        }
                     }
             //}
             // obtenemos los valores y reemplzamos en la formula
@@ -76,27 +63,13 @@ class RunProcess extends Controller
                 ->get();
 
             // rubros utilizados
-            $arr = [];
             foreach($values as $index => $item) {
-                $ee ="";
-                $separatorAnt = 'ANT_' . $item->mnemonic;
-                if (preg_match("/{$separatorAnt}/i", $value->formulate)) {
-                    $entry .= $item->description . ': ' . number_format($item->previous, 2) . ' <br>';
-
-                }
-                $separatorAct = 'ACT_' . $item->mnemonic;
-                if (preg_match("/{$separatorAct}/i", $value->formulate)) {
-                    $entry .= $item->description . ': ' . number_format($item->current, 2) . ' <br>';
-                    $ee = "entro";
-                }
-
 
                 $value->formulate = str_replace('ANT_' . $item->mnemonic, $item->previous, $value->formulate);
                 $value->formulate = str_replace('ACT_' . $item->mnemonic, $item->current, $value->formulate);
-                $arr[$index] = $value->formulate."-_".$item->mnemonic."_".$entry.":_:".$ee;
 
             }
-            $array[$key] = $arr;
+
             $result = "";
 
             try {
@@ -107,7 +80,6 @@ class RunProcess extends Controller
                 $result = null;
             }
 
-
             Result::create([
                 'id_criterio' => $request->get('criterion'),
                 'id_indicador' => $value->indicator,
@@ -116,20 +88,78 @@ class RunProcess extends Controller
                 'resultado' => $result,
                 'formula' => $value->viewFormulate,
                 'formula_descifrada' => $value->formulate,
-                'valores' => $entry,
                 'validacion_formula' => $result ? 'O' : 'E'
             ]);
 
+        }
+
+        $response = Indicator::select('id_resultado as id', 'lista_variables as listValues', 'tbl_indicadores.nemonico as denomic',
+        'resultado as result', 'nombre as name')
+            ->join('tbl_resultados', 'tbl_resultados.id_indicador', '=', 'tbl_indicadores.id_indicador')
+            ->where('estado', 'A')
+            ->orderBy('orden', 'asc')
+            ->get();
+        $entro = [];
+
+        foreach ($response as $key => $value) {
+            $entry = "";
+            $listValues = explode(",", $value->listValues);
+
+            foreach ($listValues as $i => $item) {
 
 
+                // Actual
+                $separatorAct = 'ACT_';
+                if (preg_match("/{$separatorAct}/i", $item)) {
+                    $valueAct = explode("ACT_", $item);
+                    $valuesAct = Value::select('valor_pa as current', 'descripcion as description')
+                        ->where([
+                            'nemonico' => $valueAct[1],
+                            'id_criterio' => $request->get('criterion')
+                        ])
+                        ->join('tbl_rubros', 'tbl_rubros.id_rubro', '=', 'tbl_valores.id_rubro')
+                        ->first();
+                    $entry .= $valuesAct->description . ': ' . number_format($valuesAct->current, 2) . ' (Periodo actual) <br>';
+                }
+
+                $separatorAnt = 'ANT_';
+                if (preg_match("/{$separatorAnt}/i", $item)) {
+                    $valueANT = explode("ANT_", $item);
+                    $valuesANT = Value::select('valor_pp as previous', 'descripcion as description')
+                        ->where([
+                            'nemonico' => $valueANT[1],
+                            'id_criterio' => $request->get('criterion')
+                        ])
+                        ->join('tbl_rubros', 'tbl_rubros.id_rubro', '=', 'tbl_valores.id_rubro')
+                        ->first();
+                    $entry .= $valuesANT->description . ': ' . number_format($valuesANT->previous, 2) . ' (Periodo anterior) <br>';
+                }
+
+                $separatorVar = 'VAR_';
+                if (preg_match("/{$separatorVar}/i", $item)) {
+                    $entry .= 'Cantidad dias : ' . $criterion->countDay . ' <br>';
+                }
+
+                $separatorRes = 'RES_';
+                if (preg_match("/{$separatorRes}/i", $item)) {
+                    $entry .= $value->name . ': ' . number_format($value->result, 2) . ' <br>';
+                }
+
+
+            }
+
+            Result::where([
+                'id_resultado' => $value->id,
+            ])->update([
+                'valores' => $entry,
+            ]);
 
 
         }
 
-
         return response()->json([
             'status' => '200',
-            'response' =>  $array,
+            'data' => $entry
         ], 200);
 
 
