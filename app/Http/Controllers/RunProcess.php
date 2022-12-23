@@ -98,7 +98,7 @@ class RunProcess extends Controller
         }
 
         $response = Indicator::select('id_resultado as id', 'lista_variables as listValues', 'tbl_indicadores.nemonico as denomic',
-        'resultado as result', 'nombre as name')
+        'resultado as result', 'nombre as name', 'expresado as voiced')
             ->join('tbl_resultados', 'tbl_resultados.id_indicador', '=', 'tbl_indicadores.id_indicador')
             ->where('estado', 'A')
             ->orderBy('orden', 'asc')
@@ -146,7 +146,23 @@ class RunProcess extends Controller
 
                 $separatorRes = 'RES_';
                 if (preg_match("/{$separatorRes}/i", $item)) {
-                    $entry .= $value->name . ': ' . number_format($value->result, 2) . ' <br>';
+                    $valueRes = explode("RES_", $item);
+                    $valuesRes = Indicator::select('id_resultado as id', 'lista_variables as listValues', 'tbl_indicadores.nemonico as denomic',
+                        'resultado as result', 'nombre as name', 'expresado as voiced')
+                            ->join('tbl_resultados', 'tbl_resultados.id_indicador', '=', 'tbl_indicadores.id_indicador')
+                            ->where([
+                                'tbl_indicadores.nemonico' => $valueRes[1],
+                                'estado' => 'A'
+                            ])
+                            ->orderBy('orden', 'asc')
+                            ->first();
+
+                    if($valuesRes->voiced == '2') {
+                        $entry .= $valuesRes->name . ': ' . number_format(($valuesRes->result * 100), 2) .'% <br>';
+                    } else {
+                        $entry .= $valuesRes->name . ': ' . number_format($valuesRes->result, 2) . ' <br>';
+                    }
+
                 }
 
 
