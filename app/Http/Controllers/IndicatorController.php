@@ -190,7 +190,8 @@ class IndicatorController extends Controller
             ->first();
 
         $ratios = Indicator::select('id_resultado as id', 'nombre as name', 'descripcion as description', 'tbl_resultados.formula',
-        'resultado as result', 'valores as value', 'detalle_resultado as detailResult', 'expresado as voiced', 'validacion_formula as validate')
+        'resultado as result', 'valores as value', 'detalle_resultado as detailResult', 'expresado as voiced',
+        'validacion_formula as validate', 'publico as public')
         ->where([
             'tbl_resultados.id_criterio' => $default->id,
             'tbl_resultados.id_usuario' => $default->user,
