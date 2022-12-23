@@ -41,6 +41,10 @@ class RunProcess extends Controller
 
         foreach ($indicators as $key => $value) {
 
+            // Validamos si existe cantidad de dias periodo
+            if (strpos($value->formulate, 'VAR_DIAS_PERIODO')) {
+                $value->formulate = str_replace('VAR_DIAS_PERIODO', $criterion->countDay, $value->formulate);
+            }
             // Validamos si va a usar variables de indicadores y la reemplzamos
             //if (strpos($value->formulate, 'RES_')) {
                 $response_result = Result::select('nemonico as mnemonic','resultado as result', 'nombre as name')
