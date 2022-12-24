@@ -5,22 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Plan extends Model
+class PlanPeriod extends Model
 {
     use HasFactory;
-    protected $table = 'tbl_planes';
-    protected $primaryKey = 'id_plan';
+    protected $table = 'tbl_periodos_plan';
+    protected $primaryKey = 'id_periodo';
     public $timestamps = false;
     public $incrementing = false;
 
     protected $fillable = [
-        'id_plan',
+        'id_periodo',
         'descripcion',
         'numero',
-        'precio',
-        'tipo',
         'estado',
-        'tipo_licencia'
     ];
 
     protected $attributes = [

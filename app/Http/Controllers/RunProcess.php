@@ -103,7 +103,6 @@ class RunProcess extends Controller
             ->where('estado', 'A')
             ->orderBy('orden', 'asc')
             ->get();
-        $entro = [];
 
         foreach ($response as $key => $value) {
             $entry = "";
