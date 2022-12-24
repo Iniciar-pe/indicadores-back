@@ -44,23 +44,24 @@ class EcommerceController extends Controller
                 $per->number = $periodIten->number;
 
                 $arrayRange = [];
-                $range = PlanRange::select('id_rango as id', 'id_periodo as idPeriod',
-                    'rango_inicio as start', 'rango_fin as end', 'precio as price')
-                    ->where('id_plan',  $pla->id)
+                $range = PlanRange::select('id_rango as id', 'rango_inicio as start', 'rango_fin as end', 'precio as price')
+                    ->where([
+                        'id_plan' => $pla->id,
+                        'id_periodo' => $per->id,
+                    ])
                     ->get();
 
 
                 foreach ($range as $i => $item) {
                     $ran = new \stdClass();
-                    $ran->id = $value->id;
-                    $ran->idPeriod = $value->idPeriod;
-                    $ran->start = $value->start;
-                    $ran->end = $value->end;
-                    $ran->price = $value->price;
-                    $arrayRange[$e] = $ran;
+                    $ran->id = $item->id;
+                    $ran->start = $item->start;
+                    $ran->end = $item->end;
+                    $ran->price = $item->price;
+                    $arrayRange[$i] = $ran;
                 }
 
-                $per->rage = $arrayRange;
+                $per->range = $arrayRange;
                 $arrayPeriod[$e] = $per;
 
             }
