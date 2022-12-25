@@ -141,6 +141,14 @@ Route::group([
 });
 
 
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'ecommerce'
+], function ($router) {
+    Route::get('get-planes',[App\Http\Controllers\EcommerceController::class,'getPlanes']);
+});
+
+
 
 /*Route::group([
     'middleware' => 'api',
