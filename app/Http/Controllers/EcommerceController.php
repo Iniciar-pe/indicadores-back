@@ -19,7 +19,7 @@ class EcommerceController extends Controller
 
         $arrayPlanes = [];
 
-        $planes = Plan::select('descripcion as name', 'id_plan as id', 'tipo_licencia as type')
+        $planes = Plan::select('nombre as name', 'descripcion as description', 'imagen as image', 'id_plan as id', 'tipo_licencia as type')
             ->where('tipo_licencia', '!=', null)
             ->where('estado', 'A')
             ->get();
@@ -29,6 +29,8 @@ class EcommerceController extends Controller
             $pla->id = $value->id;
             $pla->name = $value->name;
             $pla->type = $value->type;
+            $pla->description = $value->description;
+            $pla->image = $value->image;
 
             $arrayPeriod = [];
             $periodSql = PlanPeriod::select('id_periodo as id', 'descripcion as description',
@@ -71,9 +73,16 @@ class EcommerceController extends Controller
             $arrayPlanes[$key] = $pla;
         }
 
+
+        $periodPlan = PlanPeriod::select('id_periodo as id', 'descripcion as description',
+            'numero as number')
+            ->where('estado', 'A')
+            ->get();
+
         return response()->json([
             'status' => '200',
             'planes' => $arrayPlanes,
+            'period' => $periodPlan
         ], 200);
 
     }
