@@ -20,7 +20,9 @@ class Plan extends Model
         'precio',
         'tipo',
         'estado',
-        'tipo_licencia'
+        'tipo_licencia',
+        'nombre',
+        'imagen'
     ];
 
     protected $attributes = [
