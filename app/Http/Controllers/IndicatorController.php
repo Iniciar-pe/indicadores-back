@@ -175,7 +175,7 @@ class IndicatorController extends Controller
         'tbl_distribucion_licencias.id_empresa as business', 'id_criterio as id', 'empresa_defecto as default',
         'mes_inicio as startMonth', 'anio_inicio as startYear', 'mes_fin as endMonth', 'anio_fin as endYear',
         'mes_inicio_pa as startMonthPrevious', 'anio_inicio_pa as startYearPrevious', 'mes_fin_pa as endMonthPrevious', 'anio_fin_pa as endYearPrevious',
-        'id_periodo as period', 'numero_dias as countDays', 'simbolo as symbol')
+        'id_periodo as period', 'numero_dias as countDays', 'simbolo as symbol', 'descripcion as description')
             ->where([
                 'id_usuario_asignado' => auth()->user()->id_usuario,
                 'tbl_distribucion_licencias.id_empresa' => $request->get('business'),
