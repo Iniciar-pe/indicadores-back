@@ -44,7 +44,7 @@ class AuthController extends Controller
                 'status' => '400',
                 'errors' => '{"email":["Email y/o Contraseña es incorrecto."]}'
             ], 400);
-                
+
         }
         return response()->json([
             'token' => $token,
@@ -75,7 +75,7 @@ class AuthController extends Controller
                 'role' => 'Admin',
             ]);
         } else {
-            
+
             return $this->register($request);
 
         }
@@ -127,7 +127,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        
+
         if ($validator->fails()) {
             return response()->json([
                 'status' => '400',
@@ -201,7 +201,7 @@ class AuthController extends Controller
 
 
         $token = auth()->login($user);
-            
+
        return response()->json([
             'token' => $token,
             'access_token' => $token,
@@ -234,7 +234,7 @@ class AuthController extends Controller
             'id_empresa' => 'required|string|max:255'*/
             'firstName' => 'required|string|max:255',
             'email' => 'required|string|email|max:255',
-           
+
         ]);
 
         if ($validator->fails()) {
@@ -265,22 +265,22 @@ class AuthController extends Controller
 
     }
 
-    private function incrementingHistory() 
+    private function incrementingHistory()
     {
         return HistoryPlans::orderBy('id_historial', 'desc')->first();
     }
 
-    private function incrementingUser() 
+    private function incrementingUser()
     {
         return User::orderBy('id_usuario', 'desc')->first();
     }
 
-    private function incrementing() 
+    private function incrementing()
     {
         return Business::orderBy('id_empresa', 'desc')->first();
     }
 
-    public function formatUser(Request $request) 
+    public function formatUser(Request $request)
     {
         $Name = $request->get('firstName');
         $Ape = $request->get('lastName');
@@ -295,7 +295,7 @@ class AuthController extends Controller
     public function uploadImage(Request $request)
     {
         $file = $this->upload($request);
-        
+
         $user = User::find(auth()->user()->id_usuario);
         $user->foto = '/app/avatars/' . $file;
         $user->save();
@@ -303,12 +303,12 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'image saved successfully',
             'avatar' => '/app/avatars/' . $file,
-        ]);
+        ], 200)->getContent();
 
 
     }
 
-    private function upload(Request $request) 
+    private function upload(Request $request)
     {
         if(!$request->hasFile('file') && !$request->file('file')->isValid()) {
             return '';
@@ -319,7 +319,7 @@ class AuthController extends Controller
             Storage::disk('local')->put('avatars/' . $file, file_get_contents($request->file('file')));
             return $file;
         } catch (\Throwable $th) {
-            return response()->json($th);
+            return response()->json($th, 200)->getContent();
         }
 
     }
@@ -327,7 +327,7 @@ class AuthController extends Controller
     public function listUser()
     {
 
-        $user = User::select('tbl_usuarios.id_usuario as id', 'email', 'nombres as name', 'apellidos as lastName', 
+        $user = User::select('tbl_usuarios.id_usuario as id', 'email', 'nombres as name', 'apellidos as lastName',
             'tbl_usuarios.estado as status', 'foto as avatar', 'descripcion as description', 'usuario as user')
             ->selectRaw('(SELECT SUM(numero) FROM tbl_historial_planes WHERE id_usuario = tbl_usuarios.id_usuario and estado = "A") as countLicense')
             ->join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_usuario', '=', 'tbl_usuarios.id_usuario')
@@ -347,9 +347,9 @@ class AuthController extends Controller
 
     public function listUserU(Request $request)
     {
-        
-        $user = User::select('tbl_usuarios.id_usuario as id', 'email', 'nombres as name', 'apellidos as lastName', 
-            'tbl_distribucion_licencias.estado as status', 'foto as avatar', 'descripcion as description', 'usuario as user', 
+
+        $user = User::select('tbl_usuarios.id_usuario as id', 'email', 'nombres as name', 'apellidos as lastName',
+            'tbl_distribucion_licencias.estado as status', 'foto as avatar', 'descripcion as description', 'usuario as user',
             'nombre_empresa as business')
             ->selectRaw('(select count(*) from tbl_distribucion_licencias where tbl_distribucion_licencias.id_usuario = tbl_usuarios.id_usuario) as countLicense')
             ->join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_usuario_asignado', '=', 'tbl_usuarios.id_usuario')
@@ -362,7 +362,7 @@ class AuthController extends Controller
         $userCount = User::join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_usuario', '=', 'tbl_usuarios.id_usuario')
             ->where('tbl_distribucion_licencias.id_usuario', $request->get('id'))
             ->get();
-        
+
         $userBusiness = Business::join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_empresa', '=', 'tbl_empresas.id_empresa')
             ->where('tbl_distribucion_licencias.id_usuario', $request->get('id'))
             ->orderBy('tbl_distribucion_licencias.id_usuario', 'desc')
@@ -386,7 +386,7 @@ class AuthController extends Controller
 
     public function activateUser(Request $request)
     {
-        
+
         $user = User::find($request->get('id'));
         $user->estado = $request->get('status');
         $user->save();
@@ -406,14 +406,14 @@ class AuthController extends Controller
             ], 400);
         }
 
-        
+
         $credentials = request(['email', 'password']);
         if (!auth()->attempt($credentials)) {
             return response()->json([
                 'status' => '400',
                 'errors' => '{"email":["Contraseña es incorrecto."]}'
             ], 400);
-                
+
         }
         $user = User::where('email', $request->get('email'))->first();
 
