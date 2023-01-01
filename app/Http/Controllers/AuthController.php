@@ -157,8 +157,13 @@ class AuthController extends Controller
         $name_business = $request->get('business');
         $ruc = $request->get('ruc');
 
+        if(!$request->get('business')) {
+            $name_business = $user->nombres. ' '.  $user->apellidos;
+            $ruc = 'RUC-001';
+        }
+
         if ($request->get('businessExist') == 'N') {
-            $name_business = $request->get('firstName'). ' '.  $request->get('lastName');
+            $name_business = $user->nombres. ' '.  $user->apellidos;
             $ruc = 'RUC-001';
         }
 
@@ -167,7 +172,8 @@ class AuthController extends Controller
             'id_usuario' => $user->id_usuario,
             'nombre_empresa' => ''.$name_business.'',
             'ruc' => ''.$ruc.'',
-            'estado' => 'A'
+            'estado' => 'A',
+            'tipo_empresa' => '1'
         ]);
 
         $license = LicenseDistribution::create([
