@@ -73,10 +73,14 @@ class AuthController extends Controller
                 'lastName' => auth()->user()->apellidos,
                 'avatar' => 'avatar-s-11.jpg',
                 'role' => 'Admin',
+                'action' => '1'
             ]);
         } else {
 
-            return $this->register($request);
+            // return $this->register($request);
+            return response()->json([
+                'action' => '2'
+            ]);
 
         }
 
