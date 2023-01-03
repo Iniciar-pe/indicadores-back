@@ -154,8 +154,12 @@ class IndicatorController extends Controller
 
         $template = LicenseDistribution::where([
             'id_usuario_asignado' => auth()->user()->id_usuario,
-            'id_empresa' => $request->get('business'),
-        ])->first();
+            'tbl_distribucion_licencias.id_empresa' => $request->get('business'),
+        ])
+        ->join('tbl_empresas', 'tbl_empresas.id_empresa', '=', 'tbl_distribucion_licencias.id_empresa')
+        ->first();
+
+        $typeBusiness = $template->tipo_empresa;
 
         LicenseDistribution::where([
             'id_usuario' => $template->id_usuario,
@@ -181,9 +185,16 @@ class IndicatorController extends Controller
                 'tbl_distribucion_licencias.id_empresa' => $request->get('business'),
                 'tbl_criterios.activo' => 'A',
             ])
-            ->join('tbl_criterios', function ($join) {
-                $join->on('tbl_criterios.id_empresa', '=', 'tbl_distribucion_licencias.id_empresa')
+            ->join('tbl_empresas', 'tbl_empresas.id_empresa', '=', 'tbl_distribucion_licencias.id_empresa')
+            ->join('tbl_criterios', function ($join) use ($typeBusiness) {
+                if ($typeBusiness == '3') {
+                    $join->on('tbl_criterios.id_empresa', '=',  'tbl_empresas.id_empresa_padre')
                     ->on('tbl_criterios.id_usuario', '=', 'tbl_distribucion_licencias.id_usuario');
+                } else {
+                    $join->on('tbl_criterios.id_empresa', '=',  'tbl_empresas.id_empresa')
+                    ->on('tbl_criterios.id_usuario', '=', 'tbl_distribucion_licencias.id_usuario');
+                }
+
             })
             ->join('tbl_monedas', 'tbl_monedas.id_moneda', '=', 'tbl_criterios.id_moneda')
             ->orderBy('tbl_criterios.id_criterio', 'desc')

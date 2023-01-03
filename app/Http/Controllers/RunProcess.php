@@ -22,12 +22,15 @@ class RunProcess extends Controller
         $criterion = Criterion::select('id_usuario as user', 'id_empresa as business', 'numero_dias as countDay')
             ->where('id_criterio', $request->get('criterion'))->first();
 
+        $valuesResponse = Value::select('id_empresa as business', 'id_usuario as id')
+            ->where('id_criterio', $request->get('criterion'))
+            ->first();
 
         Result::select('id_criterio as id')
         ->where([
             'id_criterio' => $request->get('criterion'),
-            'id_usuario' => $criterion->user,
-            'id_empresa' => $criterion->business,
+            'id_usuario' => $valuesResponse->id,
+            'id_empresa' => $request->get('business'),
         ])->delete();
 
         // Obtenemos la lista de indicadores y criterio
@@ -51,8 +54,8 @@ class RunProcess extends Controller
                 ->join('tbl_indicadores', 'tbl_indicadores.id_indicador', '=', 'tbl_resultados.id_indicador')
                     ->where([
                         'id_criterio' => $request->get('criterion'),
-                        'id_usuario' => $criterion->user,
-                        'id_empresa' => $criterion->business,
+                        'id_usuario' => $valuesResponse->id,
+                        'id_empresa' => $request->get('business'),
                     ])
                     ->get();
 
@@ -65,10 +68,8 @@ class RunProcess extends Controller
                 ->where('id_criterio', $request->get('criterion'))
                 ->join('tbl_rubros', 'tbl_rubros.id_rubro', '=', 'tbl_valores.id_rubro')
                 ->get();
-
             // rubros utilizados
             foreach($values as $index => $item) {
-
                 $value->formulate = str_replace('ANT_' . $item->mnemonic, $item->previous, $value->formulate);
                 $value->formulate = str_replace('ACT_' . $item->mnemonic, $item->current, $value->formulate);
 
@@ -87,8 +88,8 @@ class RunProcess extends Controller
             Result::create([
                 'id_criterio' => $request->get('criterion'),
                 'id_indicador' => $value->indicator,
-                'id_usuario' => $criterion->user,
-                'id_empresa' => $criterion->business,
+                'id_usuario' => $valuesResponse->id,
+                'id_empresa' => $request->get('business'),
                 'resultado' => $result,
                 'formula' => $value->viewFormulate,
                 'formula_descifrada' => $value->formulate,
