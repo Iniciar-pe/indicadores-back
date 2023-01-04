@@ -92,8 +92,23 @@ class AuthController extends Controller
 
         $response = Http::get('https://www.linkedin.com/oauth/v2/accessToken?'. $param);
         $quizzes = json_decode($response->body());
+
+
+        $post = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $quizzes->access_token,
+            ])->get('https://api.linkedin.com/v2/me');
+
+        $quizzesPost = json_decode($post->body());
+
+        $email = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $quizzes->access_token,
+            ])->get('https://api.linkedin.com/v2/clientAwareMemberHandles?q=members&projection=(elements*(true,EMAIL,handle~,emailAddress))');
+
+        $quizzesEmail = json_decode($email->body());
+
         return response()->json([
-            'reponse' => $quizzes->access_token,
+            'response' => $quizzesPost,
+            'email' => $quizzesEmail
         ]);
     }
 
