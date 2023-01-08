@@ -101,7 +101,11 @@ class RunProcess extends Controller
         $response = Indicator::select('id_resultado as id', 'lista_variables as listValues', 'tbl_indicadores.nemonico as denomic',
         'resultado as result', 'nombre as name', 'expresado as voiced')
             ->join('tbl_resultados', 'tbl_resultados.id_indicador', '=', 'tbl_indicadores.id_indicador')
-            ->where('estado', 'A')
+            ->where([
+                'id_criterio' => $request->get('criterion'),
+                'id_usuario' => $valuesResponse->id,
+                'id_empresa' => $request->get('business'),
+            ])
             ->orderBy('orden', 'asc')
             ->get();
 
