@@ -124,8 +124,6 @@ class RunProcess extends Controller
                         ->where([
                             'nemonico' => $valueAct[1],
                             'id_criterio' => $request->get('criterion'),
-                            'id_usuario' => $valuesResponse->id,
-                            'id_empresa' => $request->get('business'),
                         ])
                         ->join('tbl_rubros', 'tbl_rubros.id_rubro', '=', 'tbl_valores.id_rubro')
                         ->first();
@@ -138,9 +136,7 @@ class RunProcess extends Controller
                     $valuesANT = Value::select('valor_pp as previous', 'descripcion as description')
                         ->where([
                             'nemonico' => $valueANT[1],
-                            'id_criterio' => $request->get('criterion'),
-                            'id_usuario' => $valuesResponse->id,
-                            'id_empresa' => $request->get('business'),
+                            'id_criterio' => $request->get('criterion')
                         ])
                         ->join('tbl_rubros', 'tbl_rubros.id_rubro', '=', 'tbl_valores.id_rubro')
                         ->first();
@@ -160,6 +156,9 @@ class RunProcess extends Controller
                             ->join('tbl_resultados', 'tbl_resultados.id_indicador', '=', 'tbl_indicadores.id_indicador')
                             ->where([
                                 'tbl_indicadores.nemonico' => $valueRes[1],
+                                'id_criterio' => $request->get('criterion'),
+                                'id_usuario' => $valuesResponse->id,
+                                'id_empresa' => $request->get('business'),
                                 'estado' => 'A'
                             ])
                             ->orderBy('orden', 'asc')
