@@ -123,7 +123,9 @@ class RunProcess extends Controller
                     $valuesAct = Value::select('valor_pa as current', 'descripcion as description')
                         ->where([
                             'nemonico' => $valueAct[1],
-                            'id_criterio' => $request->get('criterion')
+                            'id_criterio' => $request->get('criterion'),
+                            'id_usuario' => $valuesResponse->id,
+                            'id_empresa' => $request->get('business'),
                         ])
                         ->join('tbl_rubros', 'tbl_rubros.id_rubro', '=', 'tbl_valores.id_rubro')
                         ->first();
@@ -136,7 +138,9 @@ class RunProcess extends Controller
                     $valuesANT = Value::select('valor_pp as previous', 'descripcion as description')
                         ->where([
                             'nemonico' => $valueANT[1],
-                            'id_criterio' => $request->get('criterion')
+                            'id_criterio' => $request->get('criterion'),
+                            'id_usuario' => $valuesResponse->id,
+                            'id_empresa' => $request->get('business'),
                         ])
                         ->join('tbl_rubros', 'tbl_rubros.id_rubro', '=', 'tbl_valores.id_rubro')
                         ->first();
@@ -183,7 +187,7 @@ class RunProcess extends Controller
 
         return response()->json([
             'status' => '200',
-            'data' => $entry
+            'data' => $response
         ], 200);
 
 
