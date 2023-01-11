@@ -101,7 +101,11 @@ class RunProcess extends Controller
         $response = Indicator::select('id_resultado as id', 'lista_variables as listValues', 'tbl_indicadores.nemonico as denomic',
         'resultado as result', 'nombre as name', 'expresado as voiced')
             ->join('tbl_resultados', 'tbl_resultados.id_indicador', '=', 'tbl_indicadores.id_indicador')
-            ->where('estado', 'A')
+            ->where([
+                'id_criterio' => $request->get('criterion'),
+                'id_usuario' => $valuesResponse->id,
+                'id_empresa' => $request->get('business'),
+            ])
             ->orderBy('orden', 'asc')
             ->get();
 
@@ -119,7 +123,7 @@ class RunProcess extends Controller
                     $valuesAct = Value::select('valor_pa as current', 'descripcion as description')
                         ->where([
                             'nemonico' => $valueAct[1],
-                            'id_criterio' => $request->get('criterion')
+                            'id_criterio' => $request->get('criterion'),
                         ])
                         ->join('tbl_rubros', 'tbl_rubros.id_rubro', '=', 'tbl_valores.id_rubro')
                         ->first();
@@ -152,6 +156,9 @@ class RunProcess extends Controller
                             ->join('tbl_resultados', 'tbl_resultados.id_indicador', '=', 'tbl_indicadores.id_indicador')
                             ->where([
                                 'tbl_indicadores.nemonico' => $valueRes[1],
+                                'id_criterio' => $request->get('criterion'),
+                                'id_usuario' => $valuesResponse->id,
+                                'id_empresa' => $request->get('business'),
                                 'estado' => 'A'
                             ])
                             ->orderBy('orden', 'asc')
@@ -179,7 +186,7 @@ class RunProcess extends Controller
 
         return response()->json([
             'status' => '200',
-            'data' => $entry
+            'data' => $response
         ], 200);
 
 
