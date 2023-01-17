@@ -52,7 +52,11 @@ class AuthController extends Controller
             'email' => auth()->user()->email,
             'firstName' => auth()->user()->nombres,
             'lastName' => auth()->user()->apellidos,
-            'avatar' => 'avatar-s-11.jpg',
+            'number' => auth()->user()->movil,
+            'address' => auth()->user()->direccion,
+            'country' => auth()->user()->pais,
+            'city' => auth()->user()->ciudad,
+            'avatar' => auth()->user()->foto,
             'role' => 'Admin',
         ]);
     }
