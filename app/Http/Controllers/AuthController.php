@@ -57,6 +57,7 @@ class AuthController extends Controller
             'country' => auth()->user()->pais,
             'city' => auth()->user()->ciudad,
             'avatar' => auth()->user()->foto,
+            'code' => auth()->user()->ubi_codigo,
             'role' => 'Admin',
         ]);
     }
