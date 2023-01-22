@@ -146,7 +146,9 @@ Route::group([
     'prefix' => 'ecommerce'
 ], function ($router) {
     Route::get('get-planes',[App\Http\Controllers\EcommerceController::class,'getPlanes']);
+    Route::post('add',[App\Http\Controllers\OrderControoler::class,'add']);
 });
+
 
 
 
