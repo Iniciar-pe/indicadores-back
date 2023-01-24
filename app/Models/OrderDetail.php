@@ -20,6 +20,9 @@ class OrderDetail extends Model
         'precio_unitario',
         'subtotal',
         'id_plan',
+        'fecha_inicio',
+        'fecha_fin',
+        'id_periodo_plan'
     ];
 
 }

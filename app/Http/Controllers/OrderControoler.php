@@ -31,6 +31,7 @@ class OrderControoler extends Controller
             'importe' => $request->get('total'),
             'metodo_de_pago' => $request->get('method'),
             'repuesta_pago' => $request->get('response'),
+            'numero_pedido' => $request->get('date').$request->get('hour')
         ]);
 
 
@@ -44,7 +45,10 @@ class OrderControoler extends Controller
                 'cantidad' => $value->mount,
                 'precio_unitario' => $value->value,
                 'subtotal' => $value->price,
-                'id_plan' => $value->id
+                'id_plan' => $value->id,
+                'fecha_inicio' => $value->date,
+                'fecha_fin' => $value->dateEnd,
+                'id_periodo_plan' => $value->selectedPeriod
             ]);
         }
 
