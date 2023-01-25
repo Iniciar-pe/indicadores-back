@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\UserPlan;
+use App\Models\HistoryPlans;
 
 class OrderControoler extends Controller
 {
@@ -17,6 +19,8 @@ class OrderControoler extends Controller
 
     public function add(Request $request)
     {
+        $e = explode('-', $request->get('date'));
+        $numPedido = $e[0] . $e[1];
 
         $order = Order::create([
             'id_usuario' => auth()->user()->id_usuario,
@@ -31,8 +35,10 @@ class OrderControoler extends Controller
             'importe' => $request->get('total'),
             'metodo_de_pago' => $request->get('method'),
             'repuesta_pago' => $request->get('response'),
-            'numero_pedido' => $request->get('date').$request->get('hour')
+            'numero_pedido' => $numPedido
         ]);
+
+
 
 
         $json = json_decode($request->detail);
@@ -50,11 +56,28 @@ class OrderControoler extends Controller
                 'fecha_fin' => $value->dateEnd,
                 'id_periodo_plan' => $value->selectedPeriod
             ]);
+
+            UserPlan::create([
+                'id_usuario' => auth()->user()->id_usuario,
+                'id_plan' => $value->id,
+                'estado' => 'A',
+            ]);
+
+            HistoryPlans::create([
+                'id_periodo_plan' => $value->selectedPeriod,
+                'id_usuario' => auth()->user()->id_usuario,
+                'fecha_inicio' => $value->date,
+                'fecha_fin' => $value->dateEnd,
+                'numero' => $value->mount,
+                'estado' => 'A',
+            ]);
+
         }
 
         return response()->json([
             'status' => '200',
             'message' => 'Registration registered correctly',
+            'order' => $numPedido . $order->id_pedido
         ], 200);
 
     }
