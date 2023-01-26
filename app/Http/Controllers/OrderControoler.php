@@ -57,13 +57,24 @@ class OrderControoler extends Controller
                 'id_periodo_plan' => $value->selectedPeriod
             ]);
 
-            UserPlan::create([
+            $userPlan = UserPlan::where([
                 'id_usuario' => auth()->user()->id_usuario,
                 'id_plan' => $value->id,
-                'estado' => 'A',
-            ]);
+            ])->first();
+
+            if ($userPlan) {
+                $userPlan->estado = 'A';
+                $userPlan->save();
+            } else {
+                UserPlan::create([
+                    'id_usuario' => auth()->user()->id_usuario,
+                    'id_plan' => $value->id,
+                    'estado' => 'A',
+                ]);
+            }
 
             HistoryPlans::create([
+                'id_historial' => $this->incrementing()->id_historial + 1,
                 'id_periodo_plan' => $value->selectedPeriod,
                 'id_usuario' => auth()->user()->id_usuario,
                 'fecha_inicio' => $value->date,
@@ -82,7 +93,13 @@ class OrderControoler extends Controller
 
     }
 
-
+    private function incrementing($selectedPeriod)
+    {
+        return HistoryPlans::where([
+            'id_usuario' => auth()->user()->id_usuario,
+            'id_periodo_plan' => $selectedPeriod,
+        ])->orderBy('id_plan', 'desc')->first();
+    }
 
 
 }
