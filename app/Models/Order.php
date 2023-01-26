@@ -28,7 +28,8 @@ class Order extends Model
         'importe',
         'metodo_de_pago',
         'repuesta_pago',
-        'numero_pedido'
+        'numero_pedido',
+        'estado_pago'
     ];
 
 }

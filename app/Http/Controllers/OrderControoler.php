@@ -19,9 +19,8 @@ class OrderControoler extends Controller
 
     public function add(Request $request)
     {
-        $e = explode('-', $request->get('date'));
-        $numPedido = $e[0] . $e[1];
 
+        $estado_pago = $request->get('method') == '1' ? '1' : '0';
         $order = Order::create([
             'id_usuario' => auth()->user()->id_usuario,
             'nombre' => $request->get('name'),
@@ -35,10 +34,11 @@ class OrderControoler extends Controller
             'importe' => $request->get('total'),
             'metodo_de_pago' => $request->get('method'),
             'repuesta_pago' => $request->get('response'),
-            'numero_pedido' => $numPedido
+            'estado_pago' => $estado_pago,
         ]);
 
-
+        $order->numero_pedido = '#' . $order->id_pedido;
+        $order->save();
 
 
         $json = json_decode($request->detail);
@@ -73,8 +73,10 @@ class OrderControoler extends Controller
                 ]);
             }
 
+            $id_historial = $this->incrementing($value->selectedPeriod)->id_historial;
+
             HistoryPlans::create([
-                'id_historial' => $this->incrementing()->id_historial + 1,
+                'id_historial' => $id_historial ? $id_historial + 1 : 1,
                 'id_periodo_plan' => $value->selectedPeriod,
                 'id_usuario' => auth()->user()->id_usuario,
                 'fecha_inicio' => $value->date,
@@ -88,18 +90,31 @@ class OrderControoler extends Controller
         return response()->json([
             'status' => '200',
             'message' => 'Registration registered correctly',
-            'order' => $numPedido . $order->id_pedido
+            'order' => $order->numero_pedido
         ], 200);
 
     }
 
     private function incrementing($selectedPeriod)
     {
-        return HistoryPlans::where([
-            'id_usuario' => auth()->user()->id_usuario,
-            'id_periodo_plan' => $selectedPeriod,
-        ])->orderBy('id_plan', 'desc')->first();
+        return HistoryPlans::orderBy('id_historial', 'desc')->first();
     }
 
+    public function getOrders(Request $request) {
+        $order = Order::select('numero_pedido as pedido', 'fecha as date', 'tbl_planes.nombre as license',
+            'cantidad as amount', 'subtotal as total', 'estado_pago as status')
+            ->where([
+                'id_usuario' => auth()->user()->id_usuario,
+            ])->join('tbl_pedido_detalle', 'tbl_pedido_detalle.id_pedido', '=', 'tbl_pedidos.id_pedido')
+            ->join('tbl_planes', 'tbl_planes.id_plan', '=', 'tbl_pedido_detalle.id_plan')
+            ->orderBy('tbl_pedidos.id_pedido', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => '200',
+            'message' => 'Registration registered correctly',
+            'orders' => $order
+        ], 200);
+    }
 
 }

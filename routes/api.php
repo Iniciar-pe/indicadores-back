@@ -147,6 +147,7 @@ Route::group([
 ], function ($router) {
     Route::get('get-planes',[App\Http\Controllers\EcommerceController::class,'getPlanes']);
     Route::post('add',[App\Http\Controllers\OrderControoler::class,'add']);
+    Route::get('get',[App\Http\Controllers\OrderControoler::class,'getOrders']);
 });
 
 
