@@ -90,7 +90,8 @@ class OrderControoler extends Controller
         return response()->json([
             'status' => '200',
             'message' => 'Registration registered correctly',
-            'order' => $order->numero_pedido
+            'order' => $order->numero_pedido,
+            'total' => $request->get('total')
         ], 200);
 
     }

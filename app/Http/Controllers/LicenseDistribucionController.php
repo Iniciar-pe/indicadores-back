@@ -11,7 +11,7 @@ use App\Models\Business;
 
 class LicenseDistribucionController extends Controller
 {
-    
+
     public function __construct()
     {
         $this->middleware('auth:api');
@@ -58,7 +58,7 @@ class LicenseDistribucionController extends Controller
             $user->usuario = $request->get('user');
             $user->nombres = $request->get('name');
             $user->email = $request->get('email');
-            
+
             if($request->get('password') && $request->get('password') != ''){
                 $user->password = Hash::make($request->get('password'));
             }
@@ -98,7 +98,7 @@ class LicenseDistribucionController extends Controller
                 'empresa_defecto' => 'N'
             ]);
         }*/
-        
+
 
         $license = LicenseDistribution::create([
             'id_usuario' => auth()->user()->id_usuario,
@@ -160,7 +160,7 @@ class LicenseDistribucionController extends Controller
                 'empresa_defecto' => 'N'
             ]);
         }*/
-      
+
         $license = LicenseDistribution::where('id_usuario', auth()->user()->id_usuario)
             ->where('id_empresa', $request->get('business'))
             ->where('id_usuario_asignado', $request->get('id'))
@@ -193,12 +193,12 @@ class LicenseDistribucionController extends Controller
             ->first();
     }
 
-    private function incrementingUser() 
+    private function incrementingUser()
     {
         return User::orderBy('id_usuario', 'desc')->first();
     }
 
-    public function formatUser(Request $request) 
+    public function formatUser(Request $request)
     {
         $Name = $request->get('firstName');
         $Ape = $request->get('lastName');
@@ -207,7 +207,7 @@ class LicenseDistribucionController extends Controller
         $fApe = explode(" ", $Ape);
 
         return (count($fNom) > 0 ? $fNom[0] : $Name) . (count($fApe) > 0 ? $fApe[0] : $Ape);
-    
+
     }
 
 }
