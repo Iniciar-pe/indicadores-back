@@ -8,6 +8,8 @@ use App\Models\LicenseDistribution;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Business;
+use App\Models\HistoryPlans;
+use DB;
 
 class LicenseDistribucionController extends Controller
 {
@@ -21,9 +23,10 @@ class LicenseDistribucionController extends Controller
     {
         return response()->json([
             'status' => '200',
-            'license' => LicenseDistribution::select('foto as avatar', 'tbl_usuarios.apellidos as user', 'nombre_empresa as description', 'tbl_distribucion_licencias.estado as status',
+            'license' => LicenseDistribution::select('foto as avatar', 'tbl_usuarios.apellidos as lastName', 'nombre_empresa as description',
+                'tbl_distribucion_licencias.estado as status',
                 'tbl_usuarios.nombres as name', 'tbl_distribucion_licencias.id_empresa as business', 'tbl_usuarios.email',
-                'empresa_defecto as default', 'tbl_distribucion_licencias.id_usuario_asignado as id', 'tbl_usuarios.tipo as type')
+                'empresa_defecto as default', 'tbl_distribucion_licencias.id_usuario_asignado as id', 'tbl_usuarios.tipo as type', 'id_historial as group')
                 ->Join('tbl_empresas','tbl_empresas.id_empresa', 'tbl_distribucion_licencias.id_empresa')
                 ->Join('tbl_usuarios','tbl_usuarios.id_usuario', 'tbl_distribucion_licencias.id_usuario_asignado')
                 ->where('tbl_distribucion_licencias.id_usuario', auth()->user()->id_usuario)
@@ -35,12 +38,39 @@ class LicenseDistribucionController extends Controller
         ], 200);
     }
 
+    public function getGroup(Request $request) {
+
+        $group = HistoryPlans::select('id_historial as id', 'fecha_inicio as start', 'fecha_fin as end', 'numero as number',
+        'id_plan as plan',
+        DB::raw('(select count(*) from tbl_distribucion_licencias where tbl_distribucion_licencias.id_historial = id and estado = "A") as cant'))
+            ->where([
+                'id_usuario' => auth()->user()->id_usuario,
+            ])
+            //->join('tbl_planes', 'tbl_planes.id_plan', '=', 'tbl_historial_planes.id_plan')
+            ->get();
+
+        return response()->json([
+            'status' => '200',
+            'group' =>  $group,
+        ], 200);
+
+    }
+
+    public function getListBusiness(Request $request) {
+        return response()->json([
+            'status' => '200',
+            'listBusiness' => LicenseDistribution::select('nombre_empresa as description', 'tbl_distribucion_licencias.estado as status',
+                'tbl_distribucion_licencias.id_empresa as business', 'id_historial as group')
+                ->Join('tbl_empresas','tbl_empresas.id_empresa', 'tbl_distribucion_licencias.id_empresa')
+                ->where('tbl_distribucion_licencias.id_usuario_asignado', $request->get('user'))
+                ->orderBy('tbl_distribucion_licencias.id_empresa', 'desc')->get()
+        ], 200);
+    }
+
     public function add(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'user' => 'required|string|max:255',
             'name' => 'required|string|max:255',
-            'business' => 'required|integer|max:255',
             'email' => 'required|string|email|max:255',
             //'password' => 'required|string|max:100',
         ]);
@@ -53,61 +83,75 @@ class LicenseDistribucionController extends Controller
 
         if ($existUser) {
 
-            $user = User::find($existUser->id_usuario);
-            $user->usuario = $request->get('user');
-            $user->usuario = $request->get('user');
-            $user->nombres = $request->get('name');
-            $user->email = $request->get('email');
-
+            $existUser->nombres = $request->get('name');
+            $existUser->apellidos = $request->get('lastName');
+            $existUser->email = $request->get('email');
+            // Valida si password viene con data
             if($request->get('password') && $request->get('password') != ''){
-                $user->password = Hash::make($request->get('password'));
+                $existUser->password = Hash::make($request->get('password'));
             }
-            $user->save();
-
+            $existUser->save();
+            $user = $existUser;
         } else {
-
-            /*if ($request->get('password') == '') {
-                return response()->json([
-                    'code' => '401',
-                    'status' => '400',
-                    'message' => 'Se requiere una contraseña para el usuario',
-                    'errors' => '{"message":["Se requiere una contraseña para el usuario."]}'
-                ], 400);
-            }*/
 
             $usuario = $this->incrementingUser();
 
             $user = User::create([
-                'id_usuario' => $usuario ? $usuario->id_usuario + 1 : '1',
-                'apellidos' => $request->get('user'),
+                'id_usuario' => $usuario->id_usuario + 1,
+                'apellidos' => $request->get('lastName'),
                 'email' => $request->get('email'),
                 'nombres' => $request->get('name'),
                 'password' => Hash::make($request->get('password')),
                 'tipo' => 'U',
                 'ubi_codigo' => '1',
-                'usuario' => $this->formatUser($request),
                 'foto' => '/app/avatar.png',
             ]);
         }
 
-        /*if ($request->get('default') == 'S') {
-            LicenseDistribution::where('id_usuario', auth()->user()->id_usuario)
-            //->where('id_empresa', $request->get('business'))
-            ->where('id_usuario_asignado', $user->id_usuario)
-            ->update([
-                'empresa_defecto' => 'N'
-            ]);
-        }*/
+        $json = json_decode($request->detail);
 
-
-        $license = LicenseDistribution::create([
+        LicenseDistribution::where([
             'id_usuario' => auth()->user()->id_usuario,
-            'id_empresa' => $request->get('business'),
-            'id_usuario_asignado' => $user->id_usuario,
-            //'empresa_defecto' => $request->get('default'),
-            'estado' => $request->get('status'),
-            'id_plan' => '1'
+            'id_usuario_asignado' => $user->id_usuario
+        ])
+        ->update([
+            'estado' => 'I',
         ]);
+
+
+
+        foreach ($json as $key => $value) {
+            // $response = $value->json();
+            $exist =  LicenseDistribution::where([
+                'id_usuario' => auth()->user()->id_usuario,
+                'id_empresa' => $value->id,
+                'id_usuario_asignado' => $user->id_usuario
+            ])->first();
+
+            if ($exist) {
+                LicenseDistribution::where([
+                    'id_usuario' => auth()->user()->id_usuario,
+                    'id_empresa' => $value->id,
+                    'id_usuario_asignado' => $user->id_usuario
+                ])
+                ->update([
+                    'estado' => 'A',
+                    'id_historial' => $request->get('group'),
+                    'id_plan' => $request->get('plan')
+                    //'empresa_defecto' => $request->get('default')
+                ]);
+            } else {
+                LicenseDistribution::create([
+                    'id_usuario' => auth()->user()->id_usuario,
+                    'id_empresa' => $value->id,
+                    'id_usuario_asignado' => $user->id_usuario,
+                    'estado' => 'A',
+                    'id_historial' => $request->get('group'),
+                    'id_plan' => $request->get('plan')
+                ]);
+            }
+
+        }
 
         return response()->json([
             'status' => '200',
@@ -119,9 +163,7 @@ class LicenseDistribucionController extends Controller
     public function edit(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'user' => 'required|string|max:255',
             'name' => 'required|string|max:255',
-            'business' => 'required|integer|max:255',
             'email' => 'required|string|email|max:255',
             //'password' => 'required|string|max:100',
         ]);
@@ -130,18 +172,11 @@ class LicenseDistribucionController extends Controller
             return response()->json($validator->errors()->toJson(), 400);
         }
 
-        $emailExist = User::where('email', $request->get('email'))
-            ->where('id_usuario', '!=', $request->get('id'))
-            ->first();
-
-        if($emailExist){
-            return response()->json("{ code: '0001', message: 'The new email already exists' }", 400);
-        }
 
         /* Se actualiza datos de usuario */
-        $user = User::find($request->get('id'));
-        $user->usuario = $request->get('user');
+        $user = User::find($request->get('user'));
         $user->nombres = $request->get('name');
+        $user->apellidos = $request->get('lastName');
         $user->email = $request->get('email');
         // Valida si password viene con data
         if($request->get('password') && $request->get('password') != ''){
@@ -152,22 +187,54 @@ class LicenseDistribucionController extends Controller
 
         // Se actualzia Licencias
 
-        /*if ($request->get('default') == 'S') {
-            LicenseDistribution::where('id_usuario', auth()->user()->id_usuario)
-            //->where('id_empresa', $request->get('business'))
-            ->where('id_usuario_asignado', $request->get('id'))
-            ->update([
-                'empresa_defecto' => 'N'
-            ]);
-        }*/
+        $json = json_decode($request->detail);
 
-        $license = LicenseDistribution::where('id_usuario', auth()->user()->id_usuario)
-            ->where('id_empresa', $request->get('business'))
-            ->where('id_usuario_asignado', $request->get('id'))
-            ->update([
-                'estado'=> $request->get('status'),
-                //'empresa_defecto' => $request->get('default')
-            ]);
+        LicenseDistribution::where([
+            'id_usuario' => auth()->user()->id_usuario,
+            'id_usuario_asignado' => $request->get('user')
+        ])
+        ->update([
+            'estado' => 'I',
+        ]);
+
+
+
+        foreach ($json as $key => $value) {
+            // $response = $value->json();
+            $exist =  LicenseDistribution::where([
+                'id_usuario' => auth()->user()->id_usuario,
+                'id_empresa' => $value->id,
+                'id_usuario_asignado' => $request->get('user')
+            ])->first();
+
+            if ($exist) {
+                LicenseDistribution::where([
+                    'id_usuario' => auth()->user()->id_usuario,
+                    'id_empresa' => $value->id,
+                    'id_usuario_asignado' => $request->get('user')
+                ])
+                ->update([
+                    'estado' => 'A',
+                    'id_historial' => $request->get('group'),
+                    'id_plan' => $request->get('plan')
+                    //'empresa_defecto' => $request->get('default')
+                ]);
+            } else {
+                LicenseDistribution::create([
+                    'id_usuario' => auth()->user()->id_usuario,
+                    'id_empresa' => $value->id,
+                    'id_usuario_asignado' => $request->get('user'),
+                    'estado' => 'A',
+                    'id_historial' => $request->get('group'),
+                    'id_plan' => $request->get('plan')
+                ]);
+            }
+
+
+
+
+
+        }
 
         return response()->json([
             'status' => '200',

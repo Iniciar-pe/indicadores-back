@@ -48,7 +48,7 @@ class AuthController extends Controller
         }
         return response()->json([
             'token' => $token,
-            'id' => auth()->user()->id,
+            'id' => auth()->user()->id_usuario,
             'email' => auth()->user()->email,
             'firstName' => auth()->user()->nombres,
             'lastName' => auth()->user()->apellidos,
@@ -72,7 +72,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'token' => $token,
-                'id' => auth()->user()->id,
+                'id' => auth()->user()->id_usuario,
                 'email' => auth()->user()->email,
                 'firstName' => auth()->user()->nombres,
                 'lastName' => auth()->user()->apellidos,
