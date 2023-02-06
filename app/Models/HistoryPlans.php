@@ -21,6 +21,7 @@ class HistoryPlans extends Model
         'fecha_inicio',
         'fecha_fin',
         'numero',
+        'id_plan',
         'estado',
     ];
 

@@ -20,7 +20,8 @@ class LicenseDistribution extends Model
         'id_usuario_asignado',
         'empresa_defecto',
         'estado',
-        'id_plan'
+        'id_plan',
+        'id_historial'
     ];
 
     protected $attributes = [

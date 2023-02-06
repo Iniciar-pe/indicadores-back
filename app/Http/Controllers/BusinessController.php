@@ -49,7 +49,9 @@ class BusinessController extends Controller
             'id_usuario' => auth()->user()->id_usuario,
             'nombre_empresa' => $request->get('business'),
             'ruc' => $request->get('ruc'),
-            'estado' => $request->get('status')
+            'estado' => $request->get('status'),
+            'tipo_empresa' => $request->get('type'),
+            'id_empresa_padre' => $request->get('index'),
         ]);
 
         return response()->json([

@@ -97,9 +97,11 @@ Route::group([
     'prefix' => 'licenses'
 ], function ($router) {
     Route::get('get',[App\Http\Controllers\LicenseDistribucionController::class,'get']);
+    Route::get('get-group',[App\Http\Controllers\LicenseDistribucionController::class,'getGroup']);
     Route::post('add',[App\Http\Controllers\LicenseDistribucionController::class,'add']);
     Route::put('edit',[App\Http\Controllers\LicenseDistribucionController::class,'edit']);
     Route::post('delete',[App\Http\Controllers\LicenseDistribucionController::class,'delete']);
+    Route::get('get-list',[App\Http\Controllers\LicenseDistribucionController::class,'getListBusiness']);
 });
 
 Route::group([
