@@ -29,7 +29,10 @@ class LicenseDistribucionController extends Controller
                 'empresa_defecto as default', 'tbl_distribucion_licencias.id_usuario_asignado as id', 'tbl_usuarios.tipo as type', 'id_historial as group')
                 ->Join('tbl_empresas','tbl_empresas.id_empresa', 'tbl_distribucion_licencias.id_empresa')
                 ->Join('tbl_usuarios','tbl_usuarios.id_usuario', 'tbl_distribucion_licencias.id_usuario_asignado')
-                ->where('tbl_distribucion_licencias.id_usuario', auth()->user()->id_usuario)
+                ->where([
+                    'tbl_distribucion_licencias.id_usuario' => auth()->user()->id_usuario,
+                ])
+                ->whereIn('tbl_empresas.tipo_empresa', explode(",", $request->get('type')))
                 ->orderBy('tbl_distribucion_licencias.id_empresa', 'desc')->get(),
             'business' => Business::where([
                 'id_usuario' => auth()->user()->id_usuario,

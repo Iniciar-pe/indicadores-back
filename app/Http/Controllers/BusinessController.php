@@ -109,18 +109,16 @@ class BusinessController extends Controller
             ->get();
 
         $lisence = \App\Models\LicenseDistribution::select('id_usuario as user', 'id_empresa as business', 'id_usuario_asignado as id')
-            ->where('id_usuario_asignado', auth()->user()->id_usuario)
+            //->where('id_usuario_asignado', auth()->user()->id_usuario)
             ->where('estado', 'A')
             ->first();
 
 
         $business = \App\Models\Business::select('id_empresa as id', 'nombre_empresa as name', 'ruc',
             'id_empresa_padre as chill', 'tipo_empresa as type', 'id_usuario as user')
-            ->where('id_usuario', $lisence->user)
+            ->where('id_empresa', $lisence->business)
             ->where('estado', 'A')
-            ->where(function ($q) {
-                $q->where('tipo_empresa', '1')->orWhere('tipo_empresa', '2');
-            })
+            ->whereIn('tbl_empresas.tipo_empresa', explode(",", $request->get('type')))
             ->orderBy('id_empresa', 'asc')
             ->get();
 
