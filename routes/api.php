@@ -78,6 +78,7 @@ Route::group([
     Route::put('edit',[App\Http\Controllers\BusinessController::class,'edit']);
     Route::post('delete',[App\Http\Controllers\BusinessController::class,'delete']);
     Route::get('get-business',[App\Http\Controllers\BusinessController::class,'getBusiness']);
+    Route::get('get-business-type',[App\Http\Controllers\BusinessController::class,'getBusinessType']);
 });
 
 
