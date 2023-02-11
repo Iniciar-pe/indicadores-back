@@ -154,6 +154,14 @@ Route::group([
 });
 
 
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'donate'
+], function ($router) {
+    Route::get('get',[App\Http\Controllers\DonateController::class,'getDonates']);
+});
+
+
 
 
 /*Route::group([

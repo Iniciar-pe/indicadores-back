@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\UserPlan;
 use App\Models\HistoryPlans;
+use App\Models\Donate;
 
 class OrderControoler extends Controller
 {
@@ -82,8 +83,22 @@ class OrderControoler extends Controller
                 'fecha_inicio' => $value->date,
                 'fecha_fin' => $value->dateEnd,
                 'numero' => $value->mount,
+                'id_plan' => $value->id,
                 'estado' => 'A',
             ]);
+
+            if($value->id == '6') {
+                for ($i = 1; $i <= $value->mount; $i++) {
+                    Donate::create([
+                        'id_plan' => $value->id,
+                        'id_usuario' => auth()->user()->id_usuario,
+                        'estado' => '1',
+                        'id_periodo_plan' => $value->selectedPeriod
+                    ]);
+                }
+            }
+
+
 
         }
 

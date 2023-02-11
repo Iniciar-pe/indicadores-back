@@ -65,7 +65,10 @@ class LicenseDistribucionController extends Controller
             'listBusiness' => LicenseDistribution::select('nombre_empresa as description', 'tbl_distribucion_licencias.estado as status',
                 'tbl_distribucion_licencias.id_empresa as business', 'id_historial as group')
                 ->Join('tbl_empresas','tbl_empresas.id_empresa', 'tbl_distribucion_licencias.id_empresa')
-                ->where('tbl_distribucion_licencias.id_usuario_asignado', $request->get('user'))
+                ->where([
+                    'tbl_distribucion_licencias.id_usuario_asignado' => $request->get('user'),
+                    'tbl_distribucion_licencias' => 'A'
+                ])
                 ->orderBy('tbl_distribucion_licencias.id_empresa', 'desc')->get()
         ], 200);
     }
