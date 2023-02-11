@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Support\Facades\Http;
+use App\Models\Donate;
+use App\Models\PlanPeriod;
+use Illuminate\Support\Facades\Crypt;
 
 class AuthController extends Controller
 {
@@ -159,10 +162,14 @@ class AuthController extends Controller
             ], 400);
         }
 
+        $new = Carbon::parse($request->get('date'));
+
+
         $businessIncrementing = $this->incrementing();
         $usuario = $this->incrementingUser();
         $history = $this->incrementingHistory();
-        $plan = Plan::where('tipo', 'G')->first();
+        $tipo_licencia = $request->get('token') != '' ? '2' : '0';
+        $plan = Plan::where('tipo_licencia', $tipo_licencia)->first();
 
         $user = User::create([
             'id_usuario' => $usuario ? $usuario->id_usuario + 1 : '1',
@@ -200,14 +207,9 @@ class AuthController extends Controller
             'tipo_empresa' => '1'
         ]);
 
-        $license = LicenseDistribution::create([
-            'id_usuario' => $user->id_usuario,
-            'id_empresa' => $business->id_empresa,
-            'id_usuario_asignado' => $user->id_usuario,
-            'empresa_defecto' => 'S',
-            'estado' => 'A',
-            'id_plan' => $plan->id_plan,
-        ]);
+        $id_donacion = Crypt::decrypt($request->get('token'));
+
+
 
         $userPlan = UserPlan::create([
             'id_usuario' => $user->id_usuario,
@@ -215,11 +217,30 @@ class AuthController extends Controller
             'estado' => 'A'
         ]);
 
-        $new = date('m-d-Y');
+
         $date = '';
         $endDate = '';
+        $id_periodo_plan = '1';
 
-        $history = HistoryPlans::create([
+        if($request->get('token') != '') {
+
+            $donate = Donate::find($id_donacion);
+            $donate->id_usuario_invitado = $user->id_usuario;
+            $donate->email = $request->get('email');
+            $donate->estado = '3';
+
+            $id_periodo_plan = $donate->id_periodo_plan;
+            $periodo_plan = PlanPeriod::find($donate->id_periodo_plan);
+
+            $date = Carbon::parse($request->get('date'));
+            $endDate = $new->addMonth($periodo_plan->numero);
+
+
+            $donate->save();
+        }
+
+
+        $his = HistoryPlans::create([
             'id_periodo_plan' => '1',
             'id_usuario' => $user->id_usuario,
             'id_historial' => $history ? $history->id_historial + 1 : '1',
@@ -228,6 +249,21 @@ class AuthController extends Controller
             'numero' => $plan->numero,
             'estado' => 'A'
         ]);
+
+        $license = LicenseDistribution::create([
+            'id_usuario' => $user->id_usuario,
+            'id_empresa' => $business->id_empresa,
+            'id_usuario_asignado' => $user->id_usuario,
+            'id_historial' => $his->id_historial,
+            'fecha_inicio' => $date,
+            'fecha_fin' => $endDate,
+            'empresa_defecto' => 'S',
+            'estado' => 'A',
+            'id_plan' => $plan->id_plan,
+        ]);
+
+
+
 
 
         $token = auth()->login($user);
@@ -242,6 +278,7 @@ class AuthController extends Controller
             'lastName' => auth()->user()->apellidos,
             'avatar' => 'avatar-s-11.jpg',
             'role' => 'Admin',
+            'donae'=> $donate->id_periodo_plan
         ]);
     }
 

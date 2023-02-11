@@ -21,7 +21,9 @@ class LicenseDistribution extends Model
         'empresa_defecto',
         'estado',
         'id_plan',
-        'id_historial'
+        'id_historial',
+        'fecha_inicio',
+        'fecha_fin'
     ];
 
     protected $attributes = [
