@@ -182,7 +182,8 @@ class AuthController extends Controller
             'tipo' => 'P',
             'usuario' => $this->formatUser($request),
             'foto' => '/app/avatar.png',
-            'estado' => 'A'
+            'estado' => 'A',
+            'fecha_registro' => $request->get('date')
         ]);
 
         $name_business = $request->get('business');
