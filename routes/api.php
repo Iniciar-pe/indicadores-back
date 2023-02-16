@@ -159,6 +159,7 @@ Route::group([
     'prefix' => 'donate'
 ], function ($router) {
     Route::get('get',[App\Http\Controllers\DonateController::class,'getDonates']);
+    Route::post('mail',[App\Http\Controllers\DonateController::class,'mailSend']);
 });
 
 
