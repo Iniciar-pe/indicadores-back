@@ -67,7 +67,7 @@ class LicenseDistribucionController extends Controller
                 ->Join('tbl_empresas','tbl_empresas.id_empresa', 'tbl_distribucion_licencias.id_empresa')
                 ->where([
                     'tbl_distribucion_licencias.id_usuario_asignado' => $request->get('user'),
-                    'tbl_distribucion_licencias' => 'A'
+                    'tbl_distribucion_licencias.estado' => 'A'
                 ])
                 ->orderBy('tbl_distribucion_licencias.id_empresa', 'desc')->get()
         ], 200);

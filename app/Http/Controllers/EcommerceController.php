@@ -20,7 +20,7 @@ class EcommerceController extends Controller
         $arrayPlanes = [];
 
         $planes = Plan::select('nombre as name', 'descripcion as description', 'imagen as image', 'id_plan as id', 'tipo_licencia as type')
-            ->where('tipo_licencia', '!=', null)
+            ->where('tipo', '=', 'L')
             ->where('estado', 'A')
             ->get();
 
