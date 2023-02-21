@@ -396,10 +396,9 @@ class AuthController extends Controller
     {
 
         $user = User::select('tbl_usuarios.id_usuario as id', 'email', 'nombres as name', 'apellidos as lastName',
-            'tbl_usuarios.estado as status', 'foto as avatar', 'descripcion as description', 'usuario as user')
-            ->selectRaw('(SELECT SUM(numero) FROM tbl_historial_planes WHERE id_usuario = tbl_usuarios.id_usuario and estado = "A") as countLicense')
+            'tbl_usuarios.estado as status', 'foto as avatar', 'usuario as user', 'nombre_empresa as business')
             ->join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_usuario', '=', 'tbl_usuarios.id_usuario')
-            ->join('tbl_planes', 'tbl_planes.id_plan', '=', 'tbl_distribucion_licencias.id_plan')
+            ->join('tbl_empresas', 'tbl_empresas.id_empresa', '=', 'tbl_distribucion_licencias.id_empresa')
             ->where('tbl_usuarios.tipo', 'P')
             ->orderBy('tbl_usuarios.id_usuario', 'desc')
             ->groupBy("tbl_usuarios.id_usuario")
@@ -437,10 +436,10 @@ class AuthController extends Controller
             ->groupBy("tbl_distribucion_licencias.id_usuario")
             ->get();
 
-        $history = HistoryPlans::select('fecha_inicio as start', 'fecha_fin as end')
+        $history = HistoryPlans::select('fecha_inicio as start', 'fecha_fin as end', 'numero as cant', 'id_plan as plan')
             ->where('id_usuario', $request->get('id'))
             ->orderBy('id_historial', 'desc')
-            ->first();
+            ->get();
 
         return response()->json([
             'status' => '200',
@@ -493,4 +492,5 @@ class AuthController extends Controller
             'message' => 'Contraseña actualizado correctamente'
         ], 200);
     }
+
 }
