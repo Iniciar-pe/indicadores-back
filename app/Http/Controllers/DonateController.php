@@ -19,7 +19,8 @@ class DonateController extends Controller
     public function getDonates() {
 
         $donate = Donate::select('tbl_donacion.estado as status', 'id_donacion as id', 'nombres as name',
-            'fecha_registro as date', 'comentarios as comment', 'tbl_usuarios.email')
+            'fecha_registro as date', 'comentarios as comment', 'tbl_usuarios.email',
+            'apellidos as lastName')
             ->where([
                 'tbl_donacion.id_usuario' => auth()->user()->id_usuario
             ])
@@ -36,6 +37,7 @@ class DonateController extends Controller
             $bu->comment = $value->comment;
             $bu->email = $value->email;
             $bu->token = Crypt::encrypt($value->id);
+            $bu->lastName = $value->lastName;
             $array[$key] = $bu;
 
         }
