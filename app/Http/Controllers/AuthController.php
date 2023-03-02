@@ -208,7 +208,7 @@ class AuthController extends Controller
             'tipo_empresa' => '1'
         ]);
 
-        $id_donacion = Crypt::decrypt($request->get('token'));
+
 
 
 
@@ -224,6 +224,7 @@ class AuthController extends Controller
         $id_periodo_plan = '1';
 
         if($request->get('token') != '') {
+            $id_donacion = Crypt::decrypt($request->get('token'));
 
             $donate = Donate::find($id_donacion);
             $donate->id_usuario_invitado = $user->id_usuario;
@@ -279,7 +280,6 @@ class AuthController extends Controller
             'lastName' => auth()->user()->apellidos,
             'avatar' => 'avatar-s-11.jpg',
             'role' => 'Admin',
-            'donae'=> $donate->id_periodo_plan
         ]);
     }
 
