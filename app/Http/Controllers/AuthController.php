@@ -178,7 +178,6 @@ class AuthController extends Controller
             'apellidos' => $request->get('lastName'),
             'movil' => $request->get('phone'),
             'password' => Hash::make($request->get('password')),
-            'ubi_codigo' => '1',
             'tipo' => 'P',
             'usuario' => $this->formatUser($request),
             'foto' => '/app/avatar.png',
