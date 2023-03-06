@@ -9,6 +9,7 @@ use App\Models\OrderDetail;
 use App\Models\UserPlan;
 use App\Models\HistoryPlans;
 use App\Models\Donate;
+use App\Models\LicenseDistribution;
 
 class OrderControoler extends Controller
 {
@@ -76,7 +77,7 @@ class OrderControoler extends Controller
 
             $id_historial = $this->incrementing($value->selectedPeriod)->id_historial;
 
-            HistoryPlans::create([
+            $HistoryPlans = HistoryPlans::create([
                 'id_historial' => $id_historial ? $id_historial + 1 : 1,
                 'id_periodo_plan' => $value->selectedPeriod,
                 'id_usuario' => auth()->user()->id_usuario,
@@ -86,6 +87,19 @@ class OrderControoler extends Controller
                 'id_plan' => $value->id,
                 'estado' => 'A',
             ]);
+
+            if($value->id != '6') {
+
+                LicenseDistribution::where([
+                    'id_usuario' => auth()->user()->id_usuario,
+                    'id_historial' => '0'
+                ])
+                ->update([
+                    'id_plan' => $value->id,
+                    'id_historial' => $HistoryPlans->id_historial
+                ]);
+
+            }
 
             if($value->id == '6') {
                 for ($i = 1; $i <= $value->mount; $i++) {

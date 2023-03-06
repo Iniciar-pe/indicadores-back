@@ -32,6 +32,7 @@ class LicenseDistribucionController extends Controller
                 ->where([
                     'tbl_distribucion_licencias.id_usuario' => auth()->user()->id_usuario,
                 ])
+                ->where('id_plan', '!=', '1')
                 ->whereIn('tbl_empresas.tipo_empresa', explode(",", $request->get('type')))
                 ->orderBy('tbl_distribucion_licencias.id_empresa', 'desc')->get(),
             'business' => Business::where([
