@@ -241,7 +241,7 @@ class AuthController extends Controller
         }
 
 
-        $his = HistoryPlans::create([
+        /*$his = HistoryPlans::create([
             'id_periodo_plan' => '1',
             'id_usuario' => $user->id_usuario,
             'id_historial' => $history ? $history->id_historial + 1 : '1',
@@ -250,12 +250,12 @@ class AuthController extends Controller
             'numero' => $plan->numero,
             'estado' => 'A'
         ]);
-
+*/
         $license = LicenseDistribution::create([
             'id_usuario' => $user->id_usuario,
             'id_empresa' => $business->id_empresa,
             'id_usuario_asignado' => $user->id_usuario,
-            'id_historial' => $his->id_historial,
+            'id_historial' => '0',
             'fecha_inicio' => $date,
             'fecha_fin' => $endDate,
             'empresa_defecto' => 'S',
