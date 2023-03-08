@@ -44,12 +44,15 @@ class LicenseDistribucionController extends Controller
 
     public function getGroup(Request $request) {
 
+        $type = $request->get('type') == '1' ? '4' : '5';
+
         $group = HistoryPlans::select('id_historial as id', 'fecha_inicio as start', 'fecha_fin as end', 'numero as number',
         'id_plan as plan',
         DB::raw('(select count(*) from tbl_distribucion_licencias where tbl_distribucion_licencias.id_historial = id and estado = "A") as cant'))
             ->where([
                 'id_usuario' => auth()->user()->id_usuario,
             ])
+            ->where('tbl_historial_planes.id_plan', $type)
             //->join('tbl_planes', 'tbl_planes.id_plan', '=', 'tbl_historial_planes.id_plan')
             ->get();
 
