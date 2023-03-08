@@ -370,6 +370,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'image saved successfully',
             'avatar' => '/app/avatars/' . $file,
+            'image' => $request->file('file')
         ], 200)->getContent();
 
 
