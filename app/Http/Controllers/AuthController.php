@@ -96,7 +96,7 @@ class AuthController extends Controller
 
     public function loginLn(Request $request) {
 
-        $param = 'grant_type=authorization_code&code='.$request->code.'&client_id=78eygsqp7carij&client_secret=zoT6SZTxFHhqLguP&redirect_uri=http://localhost:4200/admin/response';
+        $param = 'grant_type=authorization_code&code='.$request->code.'&client_id=78eygsqp7carij&client_secret=zoT6SZTxFHhqLguP&redirect_uri=https://frontend-indicadores.devaztweb.com/admin/response';
 
         $response = Http::get('https://www.linkedin.com/oauth/v2/accessToken?'. $param);
         $quizzes = json_decode($response->body());
