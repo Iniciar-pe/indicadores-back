@@ -75,10 +75,10 @@ class OrderControoler extends Controller
                 ]);
             }
 
-            $id_historial = $this->incrementing($value->selectedPeriod)->id_historial;
+            $id_historial = $this->incrementing($value->selectedPeriod);
 
             $HistoryPlans = HistoryPlans::create([
-                'id_historial' => $id_historial ? $id_historial + 1 : 1,
+                'id_historial' => $id_historial ? $id_historial->id_historial + 1 : 1,
                 'id_periodo_plan' => $value->selectedPeriod,
                 'id_usuario' => auth()->user()->id_usuario,
                 'fecha_inicio' => $value->date,
