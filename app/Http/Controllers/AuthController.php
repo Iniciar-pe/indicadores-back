@@ -13,6 +13,7 @@ use App\Models\Plan;
 use App\Models\Business;
 use App\Models\HistoryPlans;
 use App\Models\UserPlan;
+use App\Mail\ResetPasswordMail;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use DB;
@@ -20,6 +21,9 @@ use Illuminate\Support\Facades\Http;
 use App\Models\Donate;
 use App\Models\PlanPeriod;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Mail;
+use App\Models\PasswordReset;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -30,7 +34,15 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register', 'loginSocial', 'loginLn']]);
+        $this->middleware('auth:api', ['except' => [
+            'login',
+            'register',
+            'loginSocial',
+            'loginLn',
+            'sendPassword',
+            'changePassword'
+        ]
+    ]);
     }
 
     /**
@@ -491,6 +503,57 @@ class AuthController extends Controller
             'status' => '200',
             'message' => 'Contraseña actualizado correctamente'
         ], 200);
+    }
+
+    public function sendPassword(Request $request) {
+
+        $existUSer = !!User::where('email', $request->get('email'))->first();
+
+        if (!$existUSer) {
+            return response()->json([
+                'error' => 'Email no existe!',
+            ], 400);
+        }
+
+        $token = Str::random(60);
+
+        $oldToken = PasswordReset::where('email', $request->get('email'))->first();
+        Mail::to($request->get('email'))->send(new ResetPasswordMail($token));
+        if($oldToken) {
+            $oldToken->token = $token;
+            $oldToken->save();
+            return response()->json([
+                'user' => $oldToken,
+            ], 200);
+        }
+
+        PasswordReset::create([
+            'email' => $request->get('email'),
+            'token' => $token,
+            'created_at' => Carbon::now(),
+        ]);
+
+        return response()->json([
+            'success' => 'Correo enviado correctamente',
+        ], 200);
+
+    }
+
+    public function changePassword(Request $request) {
+
+        $oldToken = PasswordReset::where('token', $request->get('token'))->first();
+
+        //$user = User::where('email', $oldToken->email)->first();
+
+        //$user->password = Hash::make($request->get('password'));
+        //$user->save();
+
+        return response()->json([
+            'status' => '200',
+            'message' => 'Contraseña actualizado correctamente',
+            'oldToken' => $request->get('token'),
+        ], 200);
+
     }
 
 }
