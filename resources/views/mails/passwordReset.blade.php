@@ -4,7 +4,7 @@ Hola
 Estás recibiendo este correo por que hiciste una solicitud de recuperacion de
 contraseña para tu cuenta.
 
-@component('mail::button', ['url' => 'http://localhost:4200/admin/nuevo-password?token='.$token])
+@component('mail::button', ['url' => 'https://frontend-indicadores.devaztweb.com/admin/nuevo-password?token='.$token])
 Recuperar contraseña
 @endcomponent
 
