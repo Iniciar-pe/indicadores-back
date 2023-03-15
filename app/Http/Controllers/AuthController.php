@@ -542,16 +542,13 @@ class AuthController extends Controller
     public function changePassword(Request $request) {
 
         $oldToken = PasswordReset::where('token', $request->get('token'))->first();
-
-        //$user = User::where('email', $oldToken->email)->first();
-
-        //$user->password = Hash::make($request->get('password'));
-        //$user->save();
+        $user = User::where('email', $oldToken->email)->first();
+        $user->password = Hash::make($request->get('password'));
+        $user->save();
 
         return response()->json([
             'status' => '200',
             'message' => 'Contraseña actualizado correctamente',
-            'oldToken' => $request->get('token'),
         ], 200);
 
     }
