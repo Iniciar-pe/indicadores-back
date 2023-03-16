@@ -157,7 +157,8 @@ class LicenseDistribucionController extends Controller
                     'id_usuario_asignado' => $user->id_usuario,
                     'estado' => 'A',
                     'id_historial' => $request->get('group'),
-                    'id_plan' => $request->get('plan')
+                    'id_plan' => $request->get('plan'),
+                    'empresa_defecto' => 'S'
                 ]);
             }
 
