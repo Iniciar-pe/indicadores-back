@@ -93,10 +93,15 @@ class DataEntryController extends Controller
 
     public function addEntryData(Request $request) {
 
+        $template = LicenseDistribution::where([
+            'id_usuario_asignado' => auth()->user()->id_usuario,
+            'id_empresa' => $request->get('business'),
+        ])->first();
+
         $criterion = "";
 
         $exist = Criterion::where([
-            'id_usuario' => auth()->user()->id_usuario,
+            'id_usuario' => $template->id_usuario,
             'id_empresa' => $request->get('business'),
             'id_periodo' => $request->get('period'),
             'mes_inicio' => $request->get('month'),
@@ -113,14 +118,14 @@ class DataEntryController extends Controller
             $endMonthPeriod = Carbon::parse($request->get('endMonthPeriod'));
 
             Criterion::where([
-                'id_usuario' => auth()->user()->id_usuario,
+                'id_usuario' => $template->id_usuario,
                 'id_empresa' => $request->get('business'),
             ])->update([
                 'activo' => 'I',
             ]);
 
             $getCriterion = Criterion::create([
-                'id_usuario' => auth()->user()->id_usuario,
+                'id_usuario' => $template->id_usuario,
                 'id_empresa' => $request->get('business'),
                 'id_periodo' => $request->get('period'),
                 'id_moneda' => $request->get('currency'),
@@ -192,7 +197,7 @@ class DataEntryController extends Controller
             $criterion = $exist->id_criterio;
 
             Criterion::where([
-                'id_usuario' => auth()->user()->id_usuario,
+                'id_usuario' => $template->id_usuario,
                 'id_empresa' => $request->get('business'),
             ])->update([
                 'activo' => 'I',

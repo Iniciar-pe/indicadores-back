@@ -93,15 +93,10 @@ class LicenseDistribucionController extends Controller
 
         if ($existUser) {
 
-            $existUser->nombres = $request->get('name');
-            $existUser->apellidos = $request->get('lastName');
-            $existUser->email = $request->get('email');
-            // Valida si password viene con data
-            if($request->get('password') && $request->get('password') != ''){
-                $existUser->password = Hash::make($request->get('password'));
-            }
-            $existUser->save();
-            $user = $existUser;
+            return response()->json([
+                'status' => '400',
+                'message' => 'the user already exists',
+            ], 400);
         } else {
 
             $usuario = $this->incrementingUser();
