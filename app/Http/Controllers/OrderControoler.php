@@ -47,6 +47,7 @@ class OrderControoler extends Controller
 
         foreach ($json as $key => $value) {
             // $response = $value->json();
+            $selectedPeriod = $value->selectedPeriod = true ? '1' : '2';
             OrderDetail::create([
                 'id_pedido' => $order->id_pedido,
                 'orden' => $key,
@@ -56,7 +57,7 @@ class OrderControoler extends Controller
                 'id_plan' => $value->id,
                 'fecha_inicio' => $value->date,
                 'fecha_fin' => $value->dateEnd,
-                'id_periodo_plan' => $value->selectedPeriod
+                'id_periodo_plan' => $selectedPeriod
             ]);
 
             $userPlan = UserPlan::where([
@@ -75,11 +76,11 @@ class OrderControoler extends Controller
                 ]);
             }
 
-            $id_historial = $this->incrementing($value->selectedPeriod);
+            $id_historial = $this->incrementing($selectedPeriod);
 
             $HistoryPlans = HistoryPlans::create([
                 'id_historial' => $id_historial ? $id_historial->id_historial + 1 : 1,
-                'id_periodo_plan' => $value->selectedPeriod,
+                'id_periodo_plan' => $selectedPeriod,
                 'id_usuario' => auth()->user()->id_usuario,
                 'fecha_inicio' => $value->date,
                 'fecha_fin' => $value->dateEnd,
