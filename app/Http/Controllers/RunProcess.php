@@ -65,7 +65,11 @@ class RunProcess extends Controller
             //}
             // obtenemos los valores y reemplzamos en la formula
             $values = Value::select('nemonico as mnemonic', 'valor_pp as previous', 'valor_pa as current', 'descripcion as description')
-                ->where('id_criterio', $request->get('criterion'))
+                ->where([
+                    'id_usuario' => $valuesResponse->id,
+                    'id_empresa' => $request->get('business'),
+                    'id_criterio' => $request->get('criterion')
+                ])
                 ->join('tbl_rubros', 'tbl_rubros.id_rubro', '=', 'tbl_valores.id_rubro')
                 ->get();
             // rubros utilizados
