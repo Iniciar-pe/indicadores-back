@@ -373,16 +373,38 @@ class AuthController extends Controller
 
     public function uploadImage(Request $request)
     {
-        $file = $this->upload($request);
+        //$file = $this->upload($request);
 
-        $user = User::find(auth()->user()->id_usuario);
+        $target_dir = "app/avatars/";
+        $target_file = $target_dir . basename($_FILES["file"]["name"]);
+        $uploadOk = '';
+        $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+        // Check if image file is a actual image or fake image
+
+        $check = getimagesize($_FILES["file"]["tmp_name"]);
+        if($check !== false) {
+            echo "File is an image - " . $check["mime"] . ".";
+            $uploadOk = 1;
+            if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
+                echo "The file ". htmlspecialchars( basename( $_FILES["file"]["name"])). " has been uploaded.";
+              } else {
+                echo "Sorry, there was an error uploading your file.";
+              }
+        } else {
+            echo "File is not an image.";
+            $uploadOk = 0;
+        }
+
+
+
+        /*$user = User::find(auth()->user()->id_usuario);
         $user->foto = '/app/avatars/' . $file;
-        $user->save();
+        $user->save();*/
 
         return response()->json([
             'message' => 'image saved successfully',
-            'avatar' => '/app/avatars/' . $file,
-            'image' => $request->file('file')
+            'avatar' => $uploadOk .'-' . $target_file,
+            'image' => $check
         ], 200)->getContent();
 
 
@@ -394,13 +416,15 @@ class AuthController extends Controller
             return 'Error';
         }
 
-        try {
+
+
+        /*try {
             $file = $request->file('file')->getClientOriginalName();
             Storage::disk('local')->put('avatars/' . $file, file_get_contents($request->file('file')));
             return $request->file('file');
         } catch (\Throwable $th) {
             return response()->json($th, 200)->getContent();
-        }
+        }*/
 
     }
 
