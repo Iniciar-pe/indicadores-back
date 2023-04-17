@@ -391,7 +391,7 @@ class AuthController extends Controller
     private function upload(Request $request)
     {
         if(!$request->hasFile('file') && !$request->file('file')->isValid()) {
-            return '';
+            return 'Error';
         }
 
         try {
