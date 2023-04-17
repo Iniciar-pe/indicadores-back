@@ -398,7 +398,7 @@ class AuthController extends Controller
 
 
         $user = User::find(auth()->user()->id_usuario);
-        $user->foto = $target_file;
+        $user->foto = '/' . $target_file;
         $user->save();
 
         return response()->json([
