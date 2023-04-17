@@ -397,13 +397,13 @@ class AuthController extends Controller
 
 
 
-        /*$user = User::find(auth()->user()->id_usuario);
-        $user->foto = '/app/avatars/' . $file;
-        $user->save();*/
+        $user = User::find(auth()->user()->id_usuario);
+        $user->foto = $target_file;
+        $user->save();
 
         return response()->json([
             'message' => 'image saved successfully',
-            'avatar' => $uploadOk .'-' . $target_file,
+            'avatar' => $target_file,
             'image' => $check
         ], 200)->getContent();
 
