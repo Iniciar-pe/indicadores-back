@@ -397,7 +397,7 @@ class AuthController extends Controller
         try {
             $file = $request->file('file')->getClientOriginalName();
             Storage::disk('local')->put('avatars/' . $file, file_get_contents($request->file('file')));
-            return $file;
+            return $request->file('file');
         } catch (\Throwable $th) {
             return response()->json($th, 200)->getContent();
         }
