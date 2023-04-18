@@ -93,15 +93,10 @@ class LicenseDistribucionController extends Controller
 
         if ($existUser) {
 
-            $existUser->nombres = $request->get('name');
-            $existUser->apellidos = $request->get('lastName');
-            $existUser->email = $request->get('email');
-            // Valida si password viene con data
-            if($request->get('password') && $request->get('password') != ''){
-                $existUser->password = Hash::make($request->get('password'));
-            }
-            $existUser->save();
-            $user = $existUser;
+            return response()->json([
+                'status' => '400',
+                'message' => 'the user already exists',
+            ], 400);
         } else {
 
             $usuario = $this->incrementingUser();
@@ -131,12 +126,34 @@ class LicenseDistribucionController extends Controller
 
 
         foreach ($json as $key => $value) {
+
+            if ($value->type != '1') {
+                // Consultar si existe un licencia para
+                $licenseExist = LicenseDistribution::where([
+                    'id_usuario' => auth()->user()->id_usuario,
+                    'id_empresa' => $value->type == '2' ? $value->id : $value->chill,
+                    'id_usuario_asignado' => auth()->user()->id_usuario,
+                ])->exists();
+
+                if(!$licenseExist) {
+                    LicenseDistribution::create([
+                        'id_usuario' => auth()->user()->id_usuario,
+                        'id_empresa' => $value->type == '2' ? $value->id : $value->chill,
+                        'id_usuario_asignado' => auth()->user()->id_usuario,
+                        'estado' => 'A',
+                        'id_historial' => $request->get('group'),
+                        'id_plan' => $request->get('plan'),
+                        'empresa_defecto' => 'S'
+                    ]);
+                }
+            }
+
             // $response = $value->json();
             $exist =  LicenseDistribution::where([
                 'id_usuario' => auth()->user()->id_usuario,
                 'id_empresa' => $value->id,
                 'id_usuario_asignado' => $user->id_usuario
-            ])->first();
+            ])->exists();
 
             if ($exist) {
                 LicenseDistribution::where([
@@ -157,7 +174,8 @@ class LicenseDistribucionController extends Controller
                     'id_usuario_asignado' => $user->id_usuario,
                     'estado' => 'A',
                     'id_historial' => $request->get('group'),
-                    'id_plan' => $request->get('plan')
+                    'id_plan' => $request->get('plan'),
+                    'empresa_defecto' => 'S'
                 ]);
             }
 

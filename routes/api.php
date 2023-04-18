@@ -37,6 +37,10 @@ Route::group([
     Route::post('login-social', [App\Http\Controllers\AuthController::class,'loginSocial']);
     Route::post('loginLn', [App\Http\Controllers\AuthController::class,'loginLn']);
     Route::post('updatePassword', [App\Http\Controllers\AuthController::class,'updatePassword']);
+    Route::post('send-password', [App\Http\Controllers\AuthController::class,'sendPassword']);
+    Route::post('change-password', [App\Http\Controllers\AuthController::class,'changePassword']);
+
+
 });
 
 Route::group([

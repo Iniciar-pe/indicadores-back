@@ -23,7 +23,10 @@ class RunProcess extends Controller
             ->where('id_criterio', $request->get('criterion'))->first();
 
         $valuesResponse = Value::select('id_empresa as business', 'id_usuario as id')
-            ->where('id_criterio', $request->get('criterion'))
+            ->where([
+                'id_empresa' => $request->get('business'),
+                'id_criterio' => $request->get('criterion')
+            ])
             ->first();
 
         Result::select('id_criterio as id')
@@ -65,7 +68,11 @@ class RunProcess extends Controller
             //}
             // obtenemos los valores y reemplzamos en la formula
             $values = Value::select('nemonico as mnemonic', 'valor_pp as previous', 'valor_pa as current', 'descripcion as description')
-                ->where('id_criterio', $request->get('criterion'))
+                ->where([
+                    'id_usuario' => $valuesResponse->id,
+                    'id_empresa' => $request->get('business'),
+                    'id_criterio' => $request->get('criterion')
+                ])
                 ->join('tbl_rubros', 'tbl_rubros.id_rubro', '=', 'tbl_valores.id_rubro')
                 ->get();
             // rubros utilizados
@@ -124,6 +131,8 @@ class RunProcess extends Controller
                         ->where([
                             'nemonico' => $valueAct[1],
                             'id_criterio' => $request->get('criterion'),
+                            'id_usuario' => $valuesResponse->id,
+                            'id_empresa' => $request->get('business'),
                         ])
                         ->join('tbl_rubros', 'tbl_rubros.id_rubro', '=', 'tbl_valores.id_rubro')
                         ->first();
@@ -136,7 +145,9 @@ class RunProcess extends Controller
                     $valuesANT = Value::select('valor_pp as previous', 'descripcion as description')
                         ->where([
                             'nemonico' => $valueANT[1],
-                            'id_criterio' => $request->get('criterion')
+                            'id_criterio' => $request->get('criterion'),
+                            'id_usuario' => $valuesResponse->id,
+                            'id_empresa' => $request->get('business'),
                         ])
                         ->join('tbl_rubros', 'tbl_rubros.id_rubro', '=', 'tbl_valores.id_rubro')
                         ->first();

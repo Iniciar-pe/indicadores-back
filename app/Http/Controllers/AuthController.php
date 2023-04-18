@@ -13,6 +13,7 @@ use App\Models\Plan;
 use App\Models\Business;
 use App\Models\HistoryPlans;
 use App\Models\UserPlan;
+use App\Mail\ResetPasswordMail;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use DB;
@@ -20,6 +21,9 @@ use Illuminate\Support\Facades\Http;
 use App\Models\Donate;
 use App\Models\PlanPeriod;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Mail;
+use App\Models\PasswordReset;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -30,7 +34,15 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register', 'loginSocial', 'loginLn']]);
+        $this->middleware('auth:api', ['except' => [
+            'login',
+            'register',
+            'loginSocial',
+            'loginLn',
+            'sendPassword',
+            'changePassword'
+        ]
+    ]);
     }
 
     /**
@@ -96,7 +108,7 @@ class AuthController extends Controller
 
     public function loginLn(Request $request) {
 
-        $param = 'grant_type=authorization_code&code='.$request->code.'&client_id=78eygsqp7carij&client_secret=zoT6SZTxFHhqLguP&redirect_uri=http://localhost:4200/admin/response';
+        $param = 'grant_type=authorization_code&code='.$request->code.'&client_id=78eygsqp7carij&client_secret=zoT6SZTxFHhqLguP&redirect_uri=https://frontend-indicadores.devaztweb.com/admin/response';
 
         $response = Http::get('https://www.linkedin.com/oauth/v2/accessToken?'. $param);
         $quizzes = json_decode($response->body());
@@ -361,15 +373,33 @@ class AuthController extends Controller
 
     public function uploadImage(Request $request)
     {
-        $file = $this->upload($request);
+        //$file = $this->upload($request);
+
+        $target_dir = "app/avatars/";
+        $target_file = $target_dir . basename($_FILES["file"]["name"]);
+        $uploadOk = '';
+        $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+        // Check if image file is a actual image or fake image
+
+        $check = getimagesize($_FILES["file"]["tmp_name"]);
+        if($check !== false) {
+            //echo "File is an image - " . $check["mime"] . ".";
+            $uploadOk = 1;
+            if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
+                //echo "The file ". htmlspecialchars( basename( $_FILES["file"]["name"])). " has been uploaded.";
+              } else {
+              }
+        } else {
+            $uploadOk = 0;
+        }
 
         $user = User::find(auth()->user()->id_usuario);
-        $user->foto = '/app/avatars/' . $file;
+        $user->foto = '/' . $target_file;
         $user->save();
 
         return response()->json([
             'message' => 'image saved successfully',
-            'avatar' => '/app/avatars/' . $file,
+            'avatar' => '/' . $target_file,
         ], 200)->getContent();
 
 
@@ -378,16 +408,18 @@ class AuthController extends Controller
     private function upload(Request $request)
     {
         if(!$request->hasFile('file') && !$request->file('file')->isValid()) {
-            return '';
+            return 'Error';
         }
 
-        try {
+
+
+        /*try {
             $file = $request->file('file')->getClientOriginalName();
             Storage::disk('local')->put('avatars/' . $file, file_get_contents($request->file('file')));
-            return $file;
+            return $request->file('file');
         } catch (\Throwable $th) {
             return response()->json($th, 200)->getContent();
-        }
+        }*/
 
     }
 
@@ -490,6 +522,54 @@ class AuthController extends Controller
             'status' => '200',
             'message' => 'Contraseña actualizado correctamente'
         ], 200);
+    }
+
+    public function sendPassword(Request $request) {
+
+        $existUSer = !!User::where('email', $request->get('email'))->first();
+
+        if (!$existUSer) {
+            return response()->json([
+                'error' => 'Email no existe!',
+            ], 400);
+        }
+
+        $token = Str::random(60);
+
+        $oldToken = PasswordReset::where('email', $request->get('email'))->first();
+        Mail::to($request->get('email'))->send(new ResetPasswordMail($token));
+        if($oldToken) {
+            $oldToken->token = $token;
+            $oldToken->save();
+            return response()->json([
+                'user' => $oldToken,
+            ], 200);
+        }
+
+        PasswordReset::create([
+            'email' => $request->get('email'),
+            'token' => $token,
+            'created_at' => Carbon::now(),
+        ]);
+
+        return response()->json([
+            'success' => 'Correo enviado correctamente',
+        ], 200);
+
+    }
+
+    public function changePassword(Request $request) {
+
+        $oldToken = PasswordReset::where('token', $request->get('token'))->first();
+        $user = User::where('email', $oldToken->email)->first();
+        $user->password = Hash::make($request->get('password'));
+        $user->save();
+
+        return response()->json([
+            'status' => '200',
+            'message' => 'Contraseña actualizado correctamente',
+        ], 200);
+
     }
 
 }
