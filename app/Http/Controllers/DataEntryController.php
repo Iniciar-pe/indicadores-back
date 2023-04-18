@@ -146,7 +146,6 @@ class DataEntryController extends Controller
             $value = Value::where([
                 'id_criterio' => $getCriterion->id_criterio,
                 'id_empresa' => $request->get('business'),
-                'id_usuario' => auth()->user()->id_usuario,
             ])->first();
             // Se trae lista de rubros
             if(!$value) {
@@ -158,7 +157,7 @@ class DataEntryController extends Controller
                         'id_criterio' => $getCriterion->id_criterio,
                         'id_rubro' => $value->id_rubro,
                         'id_empresa' => $request->get('business'),
-                        'id_usuario' => auth()->user()->id_usuario,
+                        'id_usuario' => $getCriterion->id_usuario,
                         'valor_pp' => '0',
                         'valor_pa' => '0',
                         'estado' => 'A'
@@ -210,6 +209,48 @@ class DataEntryController extends Controller
                 'activo' => 'A',
                 'id_moneda' => $request->get('currency'),
             ]);
+
+            $value = Value::where([
+                'id_criterio' => $exist->id_criterio,
+                'id_empresa' => $request->get('business'),
+            ])->first();
+            // Se trae lista de rubros
+            if(!$value) {
+                $entry = Entry::where('estado', 'A')->orderBy('id_rubro', 'desc')->get();
+
+                foreach ($entry as $value) {
+
+                    Value::create([
+                        'id_criterio' => $exist->id_criterio,
+                        'id_rubro' => $value->id_rubro,
+                        'id_empresa' => $request->get('business'),
+                        'id_usuario' => $exist->id_usuario,
+                        'valor_pp' => '0',
+                        'valor_pa' => '0',
+                        'estado' => 'A'
+                    ]);
+                }
+
+                if ($request->get('type') == '2') {
+                    $entry = Entry::where('estado', 'A')->orderBy('id_rubro', 'desc')->get();
+                    $business = Business::select('tipo_empresa', 'id_empresa')->where('id_empresa_padre', $request->get('business'))->get();
+
+                    foreach ($business as $emp) {
+                        foreach ($entry as $value) {
+                            Value::create([
+                                'id_criterio' => $exist->id_criterio,
+                                'id_rubro' => $value->id_rubro,
+                                'id_empresa' => $emp->id_empresa,
+                                'id_usuario' => $exist->id_usuario,
+                                'valor_pp' => '0',
+                                'valor_pa' => '0',
+                                'estado' => 'A'
+                            ]);
+                        }
+                    }
+
+                }
+            }
 
         }
 
