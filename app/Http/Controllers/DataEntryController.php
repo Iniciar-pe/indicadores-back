@@ -93,16 +93,20 @@ class DataEntryController extends Controller
 
     public function addEntryData(Request $request) {
 
-        $template = LicenseDistribution::where([
-            'id_usuario_asignado' => auth()->user()->id_usuario,
-            'id_empresa' => $request->get('business'),
-        ])->first();
+        $template = LicenseDistribution::select('tbl_empresas.id_usuario', 'tbl_empresas.tipo_empresa',
+            'id_empresa_padre', 'tbl_empresas.id_empresa')
+            ->where([
+                'tbl_distribucion_licencias.id_usuario_asignado' => auth()->user()->id_usuario,
+                'tbl_distribucion_licencias.id_empresa' => $request->get('business'),
+            ])
+            ->join('tbl_empresas', 'tbl_empresas.id_empresa', '=', 'tbl_distribucion_licencias.id_empresa')
+            ->first();
 
         $criterion = "";
 
         $exist = Criterion::where([
             'id_usuario' => $template->id_usuario,
-            'id_empresa' => $request->get('business'),
+            'id_empresa' => $request->get('type') == '3' ? $template->id_empresa_padre : $template->id_empresa,
             'id_periodo' => $request->get('period'),
             'mes_inicio' => $request->get('month'),
             'anio_inicio' => $request->get('year'),
@@ -110,7 +114,14 @@ class DataEntryController extends Controller
 
 
 
-        if(!$exist) {
+        if(empty($exist)) {
+
+            if ($request->get('type') == '3') {
+                return response()->json([
+                    'status' => '400',
+                    'message' => 'No tiene un criterio la empresa padre',
+                ], 200);
+            }
 
             $startMonth = Carbon::parse($request->get('startMonth'));
             $endMonth = Carbon::parse($request->get('endMonth'));
@@ -210,45 +221,47 @@ class DataEntryController extends Controller
                 'id_moneda' => $request->get('currency'),
             ]);
 
-            $value = Value::where([
-                'id_criterio' => $exist->id_criterio,
-                'id_empresa' => $request->get('business'),
-            ])->first();
-            // Se trae lista de rubros
-            if(!$value) {
-                $entry = Entry::where('estado', 'A')->orderBy('id_rubro', 'desc')->get();
-
-                foreach ($entry as $value) {
-
-                    Value::create([
-                        'id_criterio' => $exist->id_criterio,
-                        'id_rubro' => $value->id_rubro,
-                        'id_empresa' => $request->get('business'),
-                        'id_usuario' => $exist->id_usuario,
-                        'valor_pp' => '0',
-                        'valor_pa' => '0',
-                        'estado' => 'A'
-                    ]);
-                }
-
-                if ($request->get('type') == '2') {
+            if ($request->get('type') == '3') {
+                $value = Value::where([
+                    'id_criterio' => $exist->id_criterio,
+                    'id_empresa' => $request->get('business'),
+                ])->first();
+                // Se trae lista de rubros
+                if(!$value) {
                     $entry = Entry::where('estado', 'A')->orderBy('id_rubro', 'desc')->get();
-                    $business = Business::select('tipo_empresa', 'id_empresa')->where('id_empresa_padre', $request->get('business'))->get();
 
-                    foreach ($business as $emp) {
-                        foreach ($entry as $value) {
-                            Value::create([
-                                'id_criterio' => $exist->id_criterio,
-                                'id_rubro' => $value->id_rubro,
-                                'id_empresa' => $emp->id_empresa,
-                                'id_usuario' => $exist->id_usuario,
-                                'valor_pp' => '0',
-                                'valor_pa' => '0',
-                                'estado' => 'A'
-                            ]);
-                        }
+                    foreach ($entry as $value) {
+
+                        Value::create([
+                            'id_criterio' => $exist->id_criterio,
+                            'id_rubro' => $value->id_rubro,
+                            'id_empresa' => $request->get('business'),
+                            'id_usuario' => $exist->id_usuario,
+                            'valor_pp' => '0',
+                            'valor_pa' => '0',
+                            'estado' => 'A'
+                        ]);
                     }
 
+                    if ($request->get('type') == '2') {
+                        $entry = Entry::where('estado', 'A')->orderBy('id_rubro', 'desc')->get();
+                        $business = Business::select('tipo_empresa', 'id_empresa')->where('id_empresa_padre', $request->get('business'))->get();
+
+                        foreach ($business as $emp) {
+                            foreach ($entry as $value) {
+                                Value::create([
+                                    'id_criterio' => $exist->id_criterio,
+                                    'id_rubro' => $value->id_rubro,
+                                    'id_empresa' => $emp->id_empresa,
+                                    'id_usuario' => $exist->id_usuario,
+                                    'valor_pp' => '0',
+                                    'valor_pa' => '0',
+                                    'estado' => 'A'
+                                ]);
+                            }
+                        }
+
+                    }
                 }
             }
 
