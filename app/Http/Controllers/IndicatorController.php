@@ -207,7 +207,7 @@ class IndicatorController extends Controller
             'id_plan' => '1'
         ])->first();
 
-        $arrayType = auth()->user()->tipo == 'P' && empty($exist) ? [1, 2] : [1];
+        $arrayType = auth()->user()->tipo == 'P' && empty($exist) ? [1, 2] : (auth()->user()->tipo == 'U' ? [1, 2] : [1]);
 
         $ratios = Indicator::select('id_resultado as id', 'nombre as name', 'descripcion as description', 'tbl_resultados.formula',
         'resultado as result', 'valores as value', 'detalle_resultado as detailResult', 'expresado as voiced',
