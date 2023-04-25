@@ -61,6 +61,14 @@ class AuthController extends Controller
             ], 400);
 
         }
+
+        $type = auth()->user()->tipo;
+
+        $exist = LicenseDistribution::where([
+            'id_usuario' => auth()->user()->id_usuario,
+            'id_plan' => '1'
+        ])->first();
+
         return response()->json([
             'token' => $token,
             'id' => auth()->user()->id_usuario,
@@ -73,7 +81,7 @@ class AuthController extends Controller
             'city' => auth()->user()->ciudad,
             'avatar' => auth()->user()->foto,
             'code' => auth()->user()->ubi_codigo,
-            'role' => 'Admin',
+            'role' => $type == 'A' ? 'Admin' : ($type == 'U' ? 'Analyst' : ($type == 'P' && empty($exist) ? 'Owner' : 'Free')),
         ]);
     }
 

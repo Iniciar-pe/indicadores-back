@@ -200,6 +200,15 @@ class IndicatorController extends Controller
             ->orderBy('tbl_criterios.id_criterio', 'desc')
             ->first();
 
+
+        // ($type == 'P' && empty($exist) ? 'Owner' : 'Free')
+        $exist = LicenseDistribution::where([
+            'id_usuario' => auth()->user()->id_usuario,
+            'id_plan' => '1'
+        ])->first();
+
+        $arrayType = auth()->user()->tipo == 'P' && empty($exist) ? [1, 2] : [1];
+
         $ratios = Indicator::select('id_resultado as id', 'nombre as name', 'descripcion as description', 'tbl_resultados.formula',
         'resultado as result', 'valores as value', 'detalle_resultado as detailResult', 'expresado as voiced',
         'validacion_formula as validate', 'publico as public')
@@ -207,8 +216,9 @@ class IndicatorController extends Controller
             'tbl_resultados.id_criterio' => $default->id,
             'tbl_resultados.id_usuario' => $default->user,
             'tbl_resultados.id_empresa' => $request->get('business'),
-            'tipo' => $request->get('type')
+            'tipo' => $request->get('type'),
         ])
+        ->whereIn('publico', $arrayType)
         ->join('tbl_resultados', 'tbl_resultados.id_indicador', '=', 'tbl_indicadores.id_indicador')
         ->orderBy('orden', 'asc')
         ->get();
