@@ -47,7 +47,7 @@ class LicenseDistribucionController extends Controller
         $type = $request->get('type') == '1' ? '4' : '5';
 
         $group = HistoryPlans::select('id_historial as id', 'fecha_inicio as start', 'fecha_fin as end', 'numero as number',
-        'id_plan as plan',
+        'id_plan as plan', 'id_periodo_plan as period',
         DB::raw('(select count(*) from tbl_distribucion_licencias where tbl_distribucion_licencias.id_historial = id and estado = "A") as cant'))
             ->where([
                 'id_usuario' => auth()->user()->id_usuario,
@@ -143,6 +143,8 @@ class LicenseDistribucionController extends Controller
                         'estado' => 'A',
                         'id_historial' => $request->get('group'),
                         'id_plan' => $request->get('plan'),
+                        'fecha_inicio' => $request->get('date'),
+                        'fecha_fin' => $request->get('dateEnd'),
                         'empresa_defecto' => 'S'
                     ]);
                 }
@@ -175,6 +177,8 @@ class LicenseDistribucionController extends Controller
                     'estado' => 'A',
                     'id_historial' => $request->get('group'),
                     'id_plan' => $request->get('plan'),
+                    'fecha_inicio' => $request->get('date'),
+                    'fecha_fin' => $request->get('dateEnd'),
                     'empresa_defecto' => 'S'
                 ]);
             }
@@ -254,6 +258,8 @@ class LicenseDistribucionController extends Controller
                     'id_usuario_asignado' => $request->get('user'),
                     'estado' => 'A',
                     'id_historial' => $request->get('group'),
+                    'fecha_inicio' => $request->get('date'),
+                    'fecha_fin' => $request->get('dateEnd'),
                     'id_plan' => $request->get('plan')
                 ]);
             }
