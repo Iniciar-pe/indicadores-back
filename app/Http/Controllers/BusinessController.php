@@ -108,20 +108,17 @@ class BusinessController extends Controller
             ->where('estado', 'A')
             ->get();
 
-        $lisence = \App\Models\LicenseDistribution::select('id_usuario as user', 'id_empresa as business', 'id_usuario_asignado as id')
+        $business = \App\Models\Business::select('tbl_empresas.id_empresa as id', 'nombre_empresa as name', 'ruc',
+            'id_empresa_padre as chill', 'tipo_empresa as type', 'tbl_empresas.id_usuario as user', 'fecha_inicio as date',
+            'fecha_fin as dateEnd')
+            ->join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_empresa', '=', 'tbl_empresas.id_empresa')
+            //->where('id_usuario', $lisence->user)
             ->where('id_usuario_asignado', auth()->user()->id_usuario)
-            // ->where('estado', 'A')
-            ->first();
-
-
-        $business = \App\Models\Business::select('id_empresa as id', 'nombre_empresa as name', 'ruc',
-            'id_empresa_padre as chill', 'tipo_empresa as type', 'id_usuario as user')
-            ->where('id_usuario', $lisence->user)
-            ->where('estado', 'A')
+            ->where('tbl_empresas.estado', 'A')
             ->where(function ($q) {
                 $q->where('tipo_empresa', '1')->orWhere('tipo_empresa', '2');
             })
-            ->orderBy('id_empresa', 'asc')
+            ->orderBy('tbl_empresas.id_empresa', 'asc')
             ->get();
 
         $array = [];
@@ -130,6 +127,8 @@ class BusinessController extends Controller
             $bu = new \stdClass();
             $bu->id = $value->id;
             $bu->name = $value->name;
+            $bu->date = $value->date;
+            $bu->dateEnd = $value->dateEnd;
             $bu->ruc = $value->ruc;
             $bu->chill = $value->chill;
             $bu->type = $value->type;
@@ -140,12 +139,13 @@ class BusinessController extends Controller
 
             if($value->type == '2') {
 
-                $businessChild = \App\Models\Business::select('id_empresa as id', 'nombre_empresa as name', 'ruc',
-                    'id_empresa_padre as chill', 'tipo_empresa as type', 'id_usuario as user')
-                    //->where('id_usuario', $lisence->user)
+                $businessChild = \App\Models\Business::select('tbl_empresas.id_empresa as id', 'nombre_empresa as name', 'ruc',
+                    'id_empresa_padre as chill', 'tipo_empresa as type', 'tbl_empresas.id_usuario as user', 'fecha_inicio as date',
+                    'fecha_fin as dateEnd')
+                    ->join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_empresa', '=', 'tbl_empresas.id_empresa')
                     ->where('id_empresa_padre',  $value->id)
-                    ->where('estado', 'A')
-                    ->orderBy('id_empresa', 'asc')
+                    ->where('tbl_empresas.estado', 'A')
+                    ->orderBy('tbl_empresas.id_empresa', 'asc')
                     ->get();
 
                 foreach ($businessChild as $i => $values){
@@ -156,6 +156,8 @@ class BusinessController extends Controller
                     $bus->chill = $values->chill;
                     $bus->type = $values->type;
                     $bus->user = $values->user;
+                    $bus->date = $values->date;
+                    $bus->dateEnd = $values->dateEnd;
 
                     $array[$e] = $bus;
                     $e++;
