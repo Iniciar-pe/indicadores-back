@@ -123,7 +123,7 @@ class LicenseDistribucionController extends Controller
             'estado' => 'I',
         ]);
 
-
+        $history = HistoryPlans::where('id_historial', $request->get('group'))->first();
 
         foreach ($json as $key => $value) {
 
@@ -143,8 +143,8 @@ class LicenseDistribucionController extends Controller
                         'estado' => 'A',
                         'id_historial' => $request->get('group'),
                         'id_plan' => $request->get('plan'),
-                        'fecha_inicio' => $request->get('date'),
-                        'fecha_fin' => $request->get('dateEnd'),
+                        'fecha_inicio' => $history->fecha_inicio,
+                        'fecha_fin' => $history->fecha_fin,
                         'empresa_defecto' => 'S'
                     ]);
                 }
@@ -166,7 +166,9 @@ class LicenseDistribucionController extends Controller
                 ->update([
                     'estado' => 'A',
                     'id_historial' => $request->get('group'),
-                    'id_plan' => $request->get('plan')
+                    'id_plan' => $request->get('plan'),
+                    'fecha_inicio' => $history->fecha_inicio,
+                    'fecha_fin' => $history->fecha_fin,
                     //'empresa_defecto' => $request->get('default')
                 ]);
             } else {
@@ -177,8 +179,8 @@ class LicenseDistribucionController extends Controller
                     'estado' => 'A',
                     'id_historial' => $request->get('group'),
                     'id_plan' => $request->get('plan'),
-                    'fecha_inicio' => $request->get('date'),
-                    'fecha_fin' => $request->get('dateEnd'),
+                    'fecha_inicio' => $history->fecha_inicio,
+                    'fecha_fin' => $history->fecha_fin,
                     'empresa_defecto' => 'S'
                 ]);
             }
@@ -229,7 +231,7 @@ class LicenseDistribucionController extends Controller
             'estado' => 'I',
         ]);
 
-
+        $history = HistoryPlans::where('id_historial', $request->get('group'))->first();
 
         foreach ($json as $key => $value) {
             // $response = $value->json();
@@ -248,7 +250,9 @@ class LicenseDistribucionController extends Controller
                 ->update([
                     'estado' => 'A',
                     'id_historial' => $request->get('group'),
-                    'id_plan' => $request->get('plan')
+                    'id_plan' => $request->get('plan'),
+                    'fecha_inicio' => $history->fecha_inicio,
+                    'fecha_fin' => $history->fecha_fin,
                     //'empresa_defecto' => $request->get('default')
                 ]);
             } else {
@@ -258,7 +262,8 @@ class LicenseDistribucionController extends Controller
                     'id_usuario_asignado' => $request->get('user'),
                     'estado' => 'A',
                     'id_historial' => $request->get('group'),
-                    'fecha_inicio' => $request->get('date'),
+                    'fecha_inicio' => $history->fecha_inicio,
+                    'fecha_fin' => $history->fecha_fin,
                     'fecha_fin' => $request->get('dateEnd'),
                     'id_plan' => $request->get('plan')
                 ]);
