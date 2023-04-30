@@ -133,7 +133,8 @@ class OrderControoler extends Controller
 
     public function getOrders(Request $request) {
         $order = Order::select('numero_pedido as pedido', 'fecha as date', 'tbl_planes.nombre as license',
-            'cantidad as amount', 'subtotal as total', 'estado_pago as status')
+            'cantidad as amount', 'subtotal as total', 'estado_pago as status', 'fecha_inicio as date', 'fecha_fin as dateEnd',
+            'id_periodo_plan as period')
             ->where([
                 'id_usuario' => auth()->user()->id_usuario,
             ])->join('tbl_pedido_detalle', 'tbl_pedido_detalle.id_pedido', '=', 'tbl_pedidos.id_pedido')
