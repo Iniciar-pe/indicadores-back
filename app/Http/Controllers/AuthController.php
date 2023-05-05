@@ -62,6 +62,27 @@ class AuthController extends Controller
 
         }
 
+        if (auth()->user()->estado == 'I') {
+            return response()->json([
+                'status' => '400',
+                'errors' => '{"email":["Su cuenta esta inactiva."]}'
+            ], 400);
+        }
+
+        if (auth()->user()->tipo == 'U') {
+            $license = LicenseDistribution::where([
+                'id_usuario_asignado' => auth()->user()->id_usuario,
+            ])
+            ->join('tbl_usuarios', 'tbl_usuarios.id_usuario', '=', 'tbl_distribucion_licencias.id_usuario')
+            ->first();
+            if ($license->estado == 'I') {
+                return response()->json([
+                    'status' => '400',
+                    'errors' => '{"email":["Su cuenta esta inactiva."]}'
+                ], 400);
+            }
+        }
+
         $type = auth()->user()->tipo;
 
         $exist = LicenseDistribution::where([
@@ -475,7 +496,8 @@ class AuthController extends Controller
             ->groupBy("tbl_distribucion_licencias.id_usuario")
             ->get();
 
-        $history = HistoryPlans::select('fecha_inicio as start', 'fecha_fin as end', 'numero as cant', 'id_plan as plan')
+        $history = HistoryPlans::select('fecha_inicio as start', 'fecha_fin as end', 'numero as cant', 'id_plan as plan',
+            'estado as status', 'id_historial as id')
             ->where('id_usuario', $request->get('id'))
             ->orderBy('id_historial', 'desc')
             ->get();
@@ -576,6 +598,27 @@ class AuthController extends Controller
         return response()->json([
             'status' => '200',
             'message' => 'Contraseña actualizado correctamente',
+        ], 200);
+
+    }
+
+    public function updateHistory(Request $request) {
+
+        HistoryPlans::where([
+            'id_historial' => $request->get('id'),
+        ])->update([
+            'estado' => $request->get('status'),
+        ]);
+
+        LicenseDistribution::where([
+            'id_historial' => $request->get('id'),
+        ])->update([
+            'estado' => $request->get('status'),
+        ]);
+
+        return response()->json([
+            'status' => '200',
+            'message' => 'Estado del grupo actualizado',
         ], 200);
 
     }

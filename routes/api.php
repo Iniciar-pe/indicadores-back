@@ -39,8 +39,7 @@ Route::group([
     Route::post('updatePassword', [App\Http\Controllers\AuthController::class,'updatePassword']);
     Route::post('send-password', [App\Http\Controllers\AuthController::class,'sendPassword']);
     Route::post('change-password', [App\Http\Controllers\AuthController::class,'changePassword']);
-
-
+    Route::post('update-history', [App\Http\Controllers\AuthController::class,'updateHistory']);
 });
 
 Route::group([
