@@ -24,7 +24,7 @@ class LicenseDistribucionController extends Controller
         return response()->json([
             'status' => '200',
             'license' => LicenseDistribution::select('foto as avatar', 'tbl_usuarios.apellidos as lastName', 'nombre_empresa as description',
-                'tbl_distribucion_licencias.estado as status',
+                'tbl_usuarios.estado as status',
                 'tbl_usuarios.nombres as name', 'tbl_distribucion_licencias.id_empresa as business', 'tbl_usuarios.email',
                 'empresa_defecto as default', 'tbl_distribucion_licencias.id_usuario_asignado as id', 'tbl_usuarios.tipo as type', 'id_historial as group')
                 ->Join('tbl_empresas','tbl_empresas.id_empresa', 'tbl_distribucion_licencias.id_empresa')
@@ -109,6 +109,7 @@ class LicenseDistribucionController extends Controller
                 'password' => Hash::make($request->get('password')),
                 'tipo' => 'U',
                 'ubi_codigo' => '1',
+                'estado' => $request->get('status'),
                 'foto' => '/app/avatar.png',
             ]);
         }
@@ -212,6 +213,7 @@ class LicenseDistribucionController extends Controller
         $user->nombres = $request->get('name');
         $user->apellidos = $request->get('lastName');
         $user->email = $request->get('email');
+        $user->estado = $request->get('status');
         // Valida si password viene con data
         if($request->get('password') && $request->get('password') != ''){
             $user->password = Hash::make($request->get('password'));

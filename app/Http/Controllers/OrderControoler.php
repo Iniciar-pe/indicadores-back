@@ -36,7 +36,7 @@ class OrderControoler extends Controller
             'importe' => $request->get('total'),
             'metodo_de_pago' => $request->get('method'),
             'repuesta_pago' => $request->get('response'),
-            'estado_pago' => $estado_pago,
+            'estado_pago' => '1',
         ]);
 
         $order->numero_pedido = '#' . $order->id_pedido;
@@ -87,6 +87,7 @@ class OrderControoler extends Controller
                 'numero' => $value->mount,
                 'id_plan' => $value->id,
                 'estado' => 'A',
+                'id_pedido' => $order->id_pedido,
             ]);
 
             if($value->id != '6') {

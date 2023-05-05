@@ -23,6 +23,7 @@ class HistoryPlans extends Model
         'numero',
         'id_plan',
         'estado',
+        'id_pedido'
     ];
 
     protected $attributes = [
