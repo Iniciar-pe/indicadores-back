@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use App\Models\PasswordReset;
 use Illuminate\Support\Str;
+use App\Models\Order;
 
 class AuthController extends Controller
 {
@@ -477,7 +478,7 @@ class AuthController extends Controller
 
         $user = User::select('tbl_usuarios.id_usuario as id', 'email', 'nombres as name', 'apellidos as lastName',
             'tbl_distribucion_licencias.estado as status', 'foto as avatar', 'descripcion as description', 'usuario as user',
-            'nombre_empresa as business')
+            'nombre_empresa as business', 'tipo_empresa as type')
             ->selectRaw('(select count(*) from tbl_distribucion_licencias where tbl_distribucion_licencias.id_usuario = tbl_usuarios.id_usuario) as countLicense')
             ->join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_usuario_asignado', '=', 'tbl_usuarios.id_usuario')
             ->join('tbl_empresas', 'tbl_empresas.id_empresa', '=', 'tbl_distribucion_licencias.id_empresa')
@@ -497,8 +498,9 @@ class AuthController extends Controller
             ->get();
 
         $history = HistoryPlans::select('fecha_inicio as start', 'fecha_fin as end', 'numero as cant', 'id_plan as plan',
-            'estado as status', 'id_historial as id')
-            ->where('id_usuario', $request->get('id'))
+            'estado as status', 'id_historial as id', 'tbl_pedidos.estado_pago as order')
+            ->join('tbl_pedidos', 'tbl_pedidos.id_pedido', '=', 'tbl_historial_planes.id_pedido')
+            ->where('tbl_historial_planes.id_usuario', $request->get('id'))
             ->orderBy('id_historial', 'desc')
             ->get();
 
@@ -604,16 +606,14 @@ class AuthController extends Controller
 
     public function updateHistory(Request $request) {
 
-        HistoryPlans::where([
-            'id_historial' => $request->get('id'),
-        ])->update([
-            'estado' => $request->get('status'),
-        ]);
 
-        LicenseDistribution::where([
-            'id_historial' => $request->get('id'),
-        ])->update([
-            'estado' => $request->get('status'),
+        $historial = HistoryPlans::where('id_historial', $request->get('id'))->first();
+
+        Order::where([
+            'id_pedido' => $historial->id_pedido,
+        ])
+        ->update([
+            'estado_pago' => $request->get('order'),
         ]);
 
         return response()->json([
