@@ -115,7 +115,8 @@ class BusinessController extends Controller
 
         $business = \App\Models\Business::select('tbl_empresas.id_empresa as id', 'nombre_empresa as name', 'ruc',
             'id_empresa_padre as chill', 'tipo_empresa as type', 'tbl_empresas.id_usuario as user', 'tbl_distribucion_licencias.fecha_inicio as date',
-            'tbl_distribucion_licencias.fecha_fin as dateEnd', 'tbl_distribucion_licencias.estado as status', 'tbl_pedidos.numero_pedido as numberOrder')
+            'tbl_distribucion_licencias.fecha_fin as dateEnd', 'tbl_distribucion_licencias.estado as status', 'tbl_pedidos.numero_pedido as numberOrder',
+            'tbl_pedidos.estado_pago  as order')
             ->join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_empresa', '=', 'tbl_empresas.id_empresa')
             ->leftJoin('tbl_historial_planes', 'tbl_historial_planes.id_historial', '=', 'tbl_distribucion_licencias.id_historial')
             ->leftJoin('tbl_pedidos', 'tbl_pedidos.id_pedido', '=', 'tbl_historial_planes.id_pedido')
@@ -130,6 +131,7 @@ class BusinessController extends Controller
         $array = [];
         $e = 0;
         foreach ($business as $key => $value){
+
             $bu = new \stdClass();
             $bu->id = $value->id;
             $bu->name = $value->name;
@@ -141,6 +143,7 @@ class BusinessController extends Controller
             $bu->user = $value->user;
             $bu->status = $value->status;
             $bu->numberOrder = $value->numberOrder;
+            $bu->order = $value->order;
 
             $array[$e] = $bu;
             $e++;
@@ -149,7 +152,8 @@ class BusinessController extends Controller
 
                 $businessChild = \App\Models\Business::select('tbl_empresas.id_empresa as id', 'nombre_empresa as name', 'ruc',
                     'id_empresa_padre as chill', 'tipo_empresa as type', 'tbl_empresas.id_usuario as user', 'tbl_distribucion_licencias.fecha_inicio as date',
-                    'tbl_distribucion_licencias.fecha_fin as dateEnd', 'tbl_distribucion_licencias.estado as status', 'tbl_pedidos.numero_pedido as numberOrder')
+                    'tbl_distribucion_licencias.fecha_fin as dateEnd', 'tbl_distribucion_licencias.estado as status',
+                    'tbl_pedidos.numero_pedido as numberOrder', 'tbl_pedidos.estado_pago  as order')
                     ->join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_empresa', '=', 'tbl_empresas.id_empresa')
                     ->leftJoin('tbl_historial_planes', 'tbl_historial_planes.id_historial', '=', 'tbl_distribucion_licencias.id_historial')
                     ->leftJoin('tbl_pedidos', 'tbl_pedidos.id_pedido', '=', 'tbl_historial_planes.id_pedido')
@@ -170,6 +174,7 @@ class BusinessController extends Controller
                     $bus->dateEnd = $values->dateEnd;
                     $bus->status = $values->status;
                     $bus->numberOrder = $values->numberOrder;
+                    $bus->order = $values->order;
 
                     $array[$e] = $bus;
                     $e++;

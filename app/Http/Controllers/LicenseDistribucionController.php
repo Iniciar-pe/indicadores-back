@@ -24,9 +24,10 @@ class LicenseDistribucionController extends Controller
         return response()->json([
             'status' => '200',
             'license' => LicenseDistribution::select('foto as avatar', 'tbl_usuarios.apellidos as lastName', 'nombre_empresa as description',
-                'tbl_usuarios.estado as status',
+                'tbl_usuarios.estado as status', 'tbl_distribucion_licencias.estado as statusLicence',
                 'tbl_usuarios.nombres as name', 'tbl_distribucion_licencias.id_empresa as business', 'tbl_usuarios.email',
-                'empresa_defecto as default', 'tbl_distribucion_licencias.id_usuario_asignado as id', 'tbl_usuarios.tipo as type', 'id_historial as group')
+                'empresa_defecto as default', 'tbl_distribucion_licencias.id_usuario_asignado as id',
+                'tbl_usuarios.tipo as type', 'id_historial as group')
                 ->Join('tbl_empresas','tbl_empresas.id_empresa', 'tbl_distribucion_licencias.id_empresa')
                 ->Join('tbl_usuarios','tbl_usuarios.id_usuario', 'tbl_distribucion_licencias.id_usuario_asignado')
                 ->where([
