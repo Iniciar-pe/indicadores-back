@@ -122,6 +122,7 @@ class BusinessController extends Controller
             ->leftJoin('tbl_pedidos', 'tbl_pedidos.id_pedido', '=', 'tbl_historial_planes.id_pedido')
             ->where('tbl_empresas.id_usuario', $lisence->user)
             ->where('tbl_empresas.estado', 'A')
+            ->groupBy('tbl_empresas.id_empresa')
             ->where(function ($q) {
                 $q->where('tipo_empresa', '1')->orWhere('tipo_empresa', '2');
             })
@@ -160,6 +161,7 @@ class BusinessController extends Controller
                     ->where('id_empresa_padre',  $value->id)
                     ->where('tbl_empresas.estado', 'A')
                     ->orderBy('tbl_empresas.id_empresa', 'asc')
+                    ->groupBy('tbl_empresas.id_empresa')
                     ->get();
 
                 foreach ($businessChild as $i => $values){
