@@ -476,7 +476,8 @@ class AuthController extends Controller
     public function listUserU(Request $request)
     {
 
-        $user = User::select('tbl_usuarios.id_usuario as id', 'email', 'nombres as name', 'apellidos as lastName',
+        if ($request->get('type') != '3') {
+            $user = User::select('tbl_usuarios.id_usuario as id', 'email', 'nombres as name', 'apellidos as lastName',
             'tbl_distribucion_licencias.estado as status', 'foto as avatar', 'descripcion as description', 'usuario as user',
             'nombre_empresa as business', 'tipo_empresa as type')
             ->selectRaw('(select count(*) from tbl_distribucion_licencias where tbl_distribucion_licencias.id_usuario = tbl_usuarios.id_usuario) as countLicense')
@@ -486,6 +487,19 @@ class AuthController extends Controller
             ->where('tbl_distribucion_licencias.id_usuario', $request->get('id'))
             ->orderBy('tbl_usuarios.id_usuario', 'desc')
             ->get();
+        } else {
+            $user = User::select('tbl_usuarios.id_usuario as id', 'tbl_usuarios.email', 'nombres as name', 'apellidos as lastName',
+            'tbl_distribucion_licencias.estado as status', 'foto as avatar', 'usuario as user',
+            'nombre_empresa as business', 'tipo_empresa as type')
+            ->selectRaw('(select count(*) from tbl_distribucion_licencias where tbl_distribucion_licencias.id_usuario = tbl_usuarios.id_usuario) as countLicense')
+            ->join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_usuario_asignado', '=', 'tbl_usuarios.id_usuario')
+            ->join('tbl_empresas', 'tbl_empresas.id_empresa', '=', 'tbl_distribucion_licencias.id_empresa')
+            ->join('tbl_donacion', 'tbl_donacion.id_usuario_invitado', '=', 'tbl_usuarios.id_usuario')
+            ->where('tbl_donacion.id_usuario', $request->get('id'))
+            ->orderBy('tbl_usuarios.id_usuario', 'desc')
+            ->get();
+        }
+
 
         $userCount = User::join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_usuario', '=', 'tbl_usuarios.id_usuario')
             ->where('tbl_distribucion_licencias.id_usuario', $request->get('id'))
