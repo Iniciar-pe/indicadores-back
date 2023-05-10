@@ -232,7 +232,20 @@ class LicenseDistribucionController extends Controller
         ])
         ->update([
             'estado' => 'I',
+            'empresa_defecto' => 'N'
         ]);
+
+        if ($request->get('group') == '0') {
+            LicenseDistribution::where([
+                'id_usuario' => auth()->user()->id_usuario,
+                'id_usuario_asignado' => $request->get('user')
+            ])
+            ->update([
+                'estado' => 'I',
+                'id_historial' => $request->get('group'),
+                'empresa_defecto' => 'N'
+            ]);
+        }
 
         $history = HistoryPlans::where('id_historial', $request->get('group'))->first();
 
@@ -256,7 +269,7 @@ class LicenseDistribucionController extends Controller
                     'id_plan' => $request->get('plan'),
                     'fecha_inicio' => $history->fecha_inicio,
                     'fecha_fin' => $history->fecha_fin,
-                    //'empresa_defecto' => $request->get('default')
+                    'empresa_defecto' => 'S'
                 ]);
             } else {
                 LicenseDistribution::create([
@@ -268,7 +281,8 @@ class LicenseDistribucionController extends Controller
                     'fecha_inicio' => $history->fecha_inicio,
                     'fecha_fin' => $history->fecha_fin,
                     'fecha_fin' => $request->get('dateEnd'),
-                    'id_plan' => $request->get('plan')
+                    'id_plan' => $request->get('plan'),
+                    'empresa_defecto' => 'S'
                 ]);
             }
 
