@@ -117,7 +117,7 @@ class BusinessController extends Controller
             'id_empresa_padre as chill', 'tipo_empresa as type', 'tbl_empresas.id_usuario as user', 'tbl_distribucion_licencias.fecha_inicio as date',
             'tbl_distribucion_licencias.fecha_fin as dateEnd', 'tbl_distribucion_licencias.estado as status', 'tbl_pedidos.numero_pedido as numberOrder',
             'tbl_pedidos.estado_pago  as order')
-            ->join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_empresa', '=', 'tbl_empresas.id_empresa')
+            ->leftJoin('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_empresa', '=', 'tbl_empresas.id_empresa')
             ->leftJoin('tbl_historial_planes', 'tbl_historial_planes.id_historial', '=', 'tbl_distribucion_licencias.id_historial')
             ->leftJoin('tbl_pedidos', 'tbl_pedidos.id_pedido', '=', 'tbl_historial_planes.id_pedido')
             ->where('tbl_empresas.id_usuario', $lisence->user)
@@ -156,7 +156,7 @@ class BusinessController extends Controller
                     'tbl_distribucion_licencias.fecha_fin as dateEnd', 'tbl_distribucion_licencias.estado as status',
                     'tbl_pedidos.numero_pedido as numberOrder', 'tbl_pedidos.estado_pago  as order')
                     //->join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_empresa', '=', 'tbl_empresas.id_empresa')
-                    ->join('tbl_distribucion_licencias', function ($join) {
+                    ->leftJoin('tbl_distribucion_licencias', function ($join) {
                         $join->on('tbl_distribucion_licencias.id_empresa', '=', 'tbl_empresas.id_empresa')
                             ->orOn('tbl_distribucion_licencias.id_usuario', '=', 'tbl_empresas.id_usuario');
                     })
