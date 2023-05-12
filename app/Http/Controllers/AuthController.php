@@ -512,10 +512,10 @@ class AuthController extends Controller
             ->get();
 
         $history = HistoryPlans::select('fecha_inicio as start', 'fecha_fin as end', 'numero as cant', 'id_plan as plan',
-            'estado as status', 'id_historial as id', 'tbl_pedidos.estado_pago as order')
+            'estado as status', 'id_historial as id', 'tbl_pedidos.estado_pago as order', 'orden')
             ->join('tbl_pedidos', 'tbl_pedidos.id_pedido', '=', 'tbl_historial_planes.id_pedido')
             ->where('tbl_historial_planes.id_usuario', $request->get('id'))
-            ->orderBy('id_historial', 'desc')
+            ->orderBy('orden', 'asc')
             ->get();
 
         return response()->json([

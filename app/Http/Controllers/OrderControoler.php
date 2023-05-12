@@ -77,6 +77,7 @@ class OrderControoler extends Controller
             }
 
             $id_historial = $this->incrementing($selectedPeriod);
+            $orden = $this->incrementingHistory($value->id);
 
             $HistoryPlans = HistoryPlans::create([
                 'id_historial' => $id_historial ? $id_historial->id_historial + 1 : 1,
@@ -88,6 +89,7 @@ class OrderControoler extends Controller
                 'id_plan' => $value->id,
                 'estado' => 'A',
                 'id_pedido' => $order->id_pedido,
+                'orden' => $orden ? $orden->orden + 1 : 1,
             ]);
 
             if($value->id != '6') {
@@ -130,6 +132,14 @@ class OrderControoler extends Controller
     private function incrementing($selectedPeriod)
     {
         return HistoryPlans::orderBy('id_historial', 'desc')->first();
+    }
+
+    private function incrementingHistory($plan)
+    {
+        return HistoryPlans::where([
+            'id_usuario' => auth()->user()->id_usuario,
+            'id_plan' => $plan,
+        ])->orderBy('orden', 'desc')->first();
     }
 
     public function getOrders(Request $request) {

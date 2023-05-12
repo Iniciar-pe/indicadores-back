@@ -105,7 +105,7 @@ class BusinessController extends Controller
 
         $default = \App\Models\LicenseDistribution::select('id_usuario as user', 'id_empresa as business', 'id_usuario_asignado as id', 'empresa_defecto as default')
             ->where('id_usuario_asignado', auth()->user()->id_usuario)
-            ->where('empresa_defecto', 'S')
+            ->where('estado', 'A')
             ->get();
 
 
@@ -155,7 +155,11 @@ class BusinessController extends Controller
                     'id_empresa_padre as chill', 'tipo_empresa as type', 'tbl_empresas.id_usuario as user', 'tbl_distribucion_licencias.fecha_inicio as date',
                     'tbl_distribucion_licencias.fecha_fin as dateEnd', 'tbl_distribucion_licencias.estado as status',
                     'tbl_pedidos.numero_pedido as numberOrder', 'tbl_pedidos.estado_pago  as order')
-                    ->join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_empresa', '=', 'tbl_empresas.id_empresa')
+                    //->join('tbl_distribucion_licencias', 'tbl_distribucion_licencias.id_empresa', '=', 'tbl_empresas.id_empresa')
+                    ->join('tbl_distribucion_licencias', function ($join) {
+                        $join->on('tbl_distribucion_licencias.id_empresa', '=', 'tbl_empresas.id_empresa')
+                            ->orOn('tbl_distribucion_licencias.id_usuario', '=', 'tbl_empresas.id_usuario');
+                    })
                     ->leftJoin('tbl_historial_planes', 'tbl_historial_planes.id_historial', '=', 'tbl_distribucion_licencias.id_historial')
                     ->leftJoin('tbl_pedidos', 'tbl_pedidos.id_pedido', '=', 'tbl_historial_planes.id_pedido')
                     ->where('id_empresa_padre',  $value->id)
