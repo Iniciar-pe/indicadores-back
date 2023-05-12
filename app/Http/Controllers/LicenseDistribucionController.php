@@ -236,7 +236,7 @@ class LicenseDistribucionController extends Controller
             'empresa_defecto' => 'N'
         ]);
 
-        if ($request->get('group') == '0') {
+        /*if ($request->get('group') == '0') {
             LicenseDistribution::where([
                 'id_usuario' => auth()->user()->id_usuario,
                 'id_usuario_asignado' => $request->get('user')
@@ -246,7 +246,15 @@ class LicenseDistribucionController extends Controller
                 'id_historial' => $request->get('group'),
                 'empresa_defecto' => 'N'
             ]);
-        }
+        }*/
+
+        LicenseDistribution::where([
+            'id_usuario' => auth()->user()->id_usuario,
+            'id_usuario_asignado' => $request->get('user')
+        ])
+        ->update([
+            'id_historial' => $request->get('group'),
+        ]);
 
         $history = HistoryPlans::where('id_historial', $request->get('group'))->first();
 
