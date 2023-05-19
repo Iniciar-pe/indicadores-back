@@ -111,7 +111,8 @@ class OrderControoler extends Controller
                         'id_plan' => $value->id,
                         'id_usuario' => auth()->user()->id_usuario,
                         'estado' => '1',
-                        'id_periodo_plan' => $value->selectedPeriod
+                        'id_periodo_plan' => $value->selectedPeriod,
+                        'id_pedido' => $order->id_pedido,
                     ]);
                 }
             }

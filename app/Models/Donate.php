@@ -21,7 +21,8 @@ class Donate extends Model
         'email',
         'comentarios',
         'estado',
-        'id_periodo_plan'
+        'id_periodo_plan',
+        'id_pedido'
     ];
 
     protected $attributes = [

@@ -637,4 +637,33 @@ class AuthController extends Controller
 
     }
 
+    public function updateDonate(Request $request) {
+
+
+        $historial = HistoryPlans::where('id_historial', $request->get('id'))->first();
+
+        Order::where([
+            'id_pedido' => $historial->id_pedido,
+        ])
+        ->update([
+            'estado_pago' => $request->get('order'),
+        ]);
+
+        $donate = Donate::where([
+            'id_pedido' => $historial->id_pedido,
+        ])->get();
+
+        foreach ($donate as $key => $value) {
+            $user = User::find($value->id_usuario_invitado);
+            $user->estado = $request->get('order') == '1' ? 'A' : 'I';
+            $user->save();
+        }
+
+        return response()->json([
+            'status' => '200',
+            'message' => 'Estado del grupo actualizado',
+        ], 200);
+
+    }
+
 }
