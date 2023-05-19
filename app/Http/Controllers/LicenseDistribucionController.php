@@ -95,10 +95,22 @@ class LicenseDistribucionController extends Controller
 
         if ($existUser) {
 
-            return response()->json([
-                'status' => '400',
-                'message' => 'the user already exists',
-            ], 400);
+            $license = LicenseDistribution::where([
+                'id_usuario' => auth()->user()->id_usuario,
+                'id_usuario_asignado' => $existUser->id_usuario
+            ])->first();
+
+            if (!$license) {
+
+                return response()->json([
+                    'status' => '400',
+                    'message' => 'the user already exists',
+                ], 400);
+
+            }
+
+            $user = $existUser;
+
         } else {
 
             $usuario = $this->incrementingUser();
@@ -120,7 +132,8 @@ class LicenseDistribucionController extends Controller
 
         LicenseDistribution::where([
             'id_usuario' => auth()->user()->id_usuario,
-            'id_usuario_asignado' => $user->id_usuario
+            'id_usuario_asignado' => $user->id_usuario,
+            'id_plan' => $request->get('plan'),
         ])
         ->update([
             'estado' => 'I',
@@ -229,7 +242,8 @@ class LicenseDistribucionController extends Controller
 
         LicenseDistribution::where([
             'id_usuario' => auth()->user()->id_usuario,
-            'id_usuario_asignado' => $request->get('user')
+            'id_usuario_asignado' => $request->get('user'),
+            'id_plan' => $request->get('plan'),
         ])
         ->update([
             'estado' => 'I',
