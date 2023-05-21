@@ -167,6 +167,13 @@ Route::group([
 });
 
 
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'word'
+], function ($router) {
+    Route::get('get',[App\Http\Controllers\WordController::class,'downloadWord']);
+});
+
 
 
 /*Route::group([
