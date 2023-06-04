@@ -20,7 +20,7 @@ class Values extends Model
         'valor',
         'texto',
         'formula',
-        'padre'
+        'valor_secundario'
     ];
 
 }
