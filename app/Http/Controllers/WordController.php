@@ -7,6 +7,7 @@ use App\Models\Criterion;
 use App\Models\Indicator;
 use Carbon\Carbon;
 use App\Models\Values;
+use PDF;
 
 
 class WordController extends Controller
@@ -14,11 +15,68 @@ class WordController extends Controller
 
     public function __construct()
     {
-        $this->middleware('auth:api');
+        //$this->middleware('auth:api');
     }
 
     public function downloadWord(Request $request) {
 
+        $response = Criterion::select('nombre_empresa as name', 'tbl_periodos_calculo.singular as singular', 'mes_inicio as moth',
+            'anio_fin as  year', 'mes_fin as mothEnd', 'anio_fin as yearEnd', 'mes_inicio_pa as moth_pa', 'anio_fin_pa as  year_pa',
+            'mes_fin_pa as mothEnd_pa', 'anio_fin_pa as yearEnd_pa', 'tbl_monedas.descripcion as name_currency', 'simbolo as symbol',
+            'numero_dias as days', 'id_criterio', 'tbl_periodos_calculo.plural as plural')
+            ->where([
+                'tbl_criterios.id_empresa' => $request->get('e'),
+            ])
+            ->join('tbl_empresas', 'tbl_empresas.id_empresa', '=', 'tbl_criterios.id_empresa')
+            ->join('tbl_periodos_calculo', 'tbl_periodos_calculo.id_periodo', '=', 'tbl_criterios.id_periodo')
+            ->join('tbl_monedas', 'tbl_monedas.id_moneda', '=', 'tbl_criterios.id_moneda')
+            ->first();
+
+        $period_actual = $this->formatDate($response->year, $response->moth, false) .' al ' . $this->formatDate($response->yearEnd, $response->mothEnd, true);
+        $period_anterior = $this->formatDate($response->year_pa, $response->moth_pa, false) .' al ' . $this->formatDate($response->yearEnd_pa, $response->mothEnd_pa, true);
+
+        $indicador = Indicator::select('tbl_indicadores.nemonico as denomic', 'resultado as result', 'expresado as voiced', 'nombre as name',
+        'tipo as type')
+            ->join('tbl_resultados', 'tbl_resultados.id_indicador', '=', 'tbl_indicadores.id_indicador')
+            ->where([
+                'id_criterio' => $response->id_criterio,
+                'id_empresa' => $request->get('e'),
+                'tipo' => '2',
+            ])
+            ->orderBy('orden', 'asc')
+            ->get();
+
+        $indicadorType = Indicator::select('tbl_indicadores.nemonico as denomic', 'resultado as result', 'expresado as voiced', 'nombre as name',
+            'tipo as type')
+            ->join('tbl_resultados', 'tbl_resultados.id_indicador', '=', 'tbl_indicadores.id_indicador')
+            ->where([
+                'id_criterio' => $response->id_criterio,
+                'id_empresa' => $request->get('e'),
+                'tipo' => '1',
+            ])
+            ->orderBy('orden', 'asc')
+            ->get();
+
+
+        $data = [
+            'nombre_empresa' => $response->name,
+            'periodo_actual' => $period_actual,
+            'periodo_anterior' => $period_anterior,
+            'periodo_nombre' => $response->singular,
+            'dias' => $response->days,
+            'moneda' => $response->name_currency,
+            'simb_modeda' => $response->symbol,
+            'indicador' => $indicador,
+            'indicadorType' => $indicadorType,
+            'periodo_nombre_plural' => $response->plural
+        ];
+
+        $pdf = PDF::loadView('pruebaparapdf', compact('data'));
+        return  $pdf->stream('prueba.pdf');
+        //return $pdf->download('pruebapdf.pdf');
+
+
+        /*
         $data = Criterion::select('nombre_empresa as name', 'tbl_periodos_calculo.singular as singular', 'mes_inicio as moth',
             'anio_fin as  year', 'mes_fin as mothEnd', 'anio_fin as yearEnd', 'mes_inicio_pa as moth_pa', 'anio_fin_pa as  year_pa',
             'mes_fin_pa as mothEnd_pa', 'anio_fin_pa as yearEnd_pa', 'tbl_monedas.descripcion as name_currency', 'simbolo as symbol',
@@ -63,6 +121,7 @@ class WordController extends Controller
         } catch (\PhpOffice\PhpWord\Exception\Exception $e) {
             return back($e->getCode());
         }
+        */
 
     }
 
