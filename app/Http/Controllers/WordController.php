@@ -15,7 +15,7 @@ class WordController extends Controller
 
     public function __construct()
     {
-        //$this->middleware('auth:api');
+        $this->middleware('auth:api');
     }
 
     public function downloadWord(Request $request) {
@@ -72,8 +72,8 @@ class WordController extends Controller
         ];
 
         $pdf = PDF::loadView('pruebaparapdf', compact('data'));
-        return  $pdf->stream('prueba.pdf');
-        //return $pdf->download('pruebapdf.pdf');
+        //return  $pdf->stream('prueba.pdf');
+        return $pdf->download('pruebapdf.pdf');
 
 
         /*
