@@ -96,7 +96,7 @@
     <center>
     <br><br><br><br>
         <h5>RESUMEN EJECUTIVO</h5>
-        <p>{{ $data['periodo_nombre'] }} De {{ $data['periodo_actual'] }}</p>
+        <p>{{ $data['periodo_nombre'] }} del {{ $data['periodo_actual'] }}</p>
     </center>
     <h4 style="page-break-before: always;">Resultados obtenidos </h4>
 
@@ -107,7 +107,7 @@
     <p><b>Cálculo de las razones financieras.</b></p>
 
     <center>
-    <p>Cantidad de días del período: </p>
+    <p>Cantidad de días del período: {{ $data['days'] }}</p>
     <p>Unidad monetaria: {{ $data['moneda'] }}  {{ $data['simb_modeda'] }} </p>
     </center>
 <br>
@@ -138,7 +138,9 @@
         @endphp
 
         @if($item->denomic == 'RAZON_CORRIENTE')
+        @php
         $TASA_MES_ACTUAL_CO = $value;
+        @endphp
         @endif
 
         @if($item->denomic == 'RAZON_CORRIENTE')
@@ -172,7 +174,7 @@
         @endIf
 
         @if($item->denomic == 'INGRESO_NETO_FLUJO_M')
-
+        <p><b>Ingreso neto del Flujo Monetario</b></p>
             @if($value > 0)
                 @foreach($data['indicadorType'] as $response)
 
@@ -235,7 +237,7 @@
                     @if($valueTotal < 0)
                         <ul>
                             <li>El costo de capital del inventario, medido en {{ $data['simb_modeda'] }} “disminuyeron” en {{ $data['simb_modeda'] }}  {{ number_format($valueTotal, 2) . ($item->voiced == '2' ? '%' : '') }}, entre los dos períodos comparados.</li>
-                            <li>Por cuanto, en conjunto las variaciones de las ventas netas, del costo de ventas, de los gastos administrativos y de los gastos de venta, ocurrida entre los ${{{ $data['periodo_nombre_plural'] }}} estudiados, arrojaron un ingreso neto del Flujo Monetario positivo, se concluye que la gestión del flujo del dinero ha sido eficaz.  </li>
+                            <li>Por cuanto, en conjunto las variaciones de las ventas netas, del costo de ventas, de los gastos administrativos y de los gastos de venta, ocurrida entre los {{ $data['periodo_nombre_plural'] }} estudiados, arrojaron un ingreso neto del Flujo Monetario positivo, se concluye que la gestión del flujo del dinero ha sido eficaz.  </li>
                         </ul>
                     @endIf
                 @endif
@@ -244,7 +246,7 @@
                 @endforeach
 
                 <p>Previamente, se debe precisar que el ingreso neto del Flujo Monetario es un indicador que mediante un monto absoluto mide el grado de eficacia en la gestión del flujo monetario de una organización. El flujo monetario comprende los ingresos (o las ventas netas), los gastos y los inventarios. La gestión del flujo monetario será eficaz si la variación absoluta de los ingresos de un período a otro es mayor a la suma de las variaciones absolutas de los gastos y del costo de capital ocasionado por los inventarios de un período a otro. En el caso que las variaciones absolutas de ambos grupos sean iguales, se calificará como una gestión indiferente o no eficaz ni ineficaz. Se considerará ineficaz cuando la variación absoluta de los ingresos de un período a otro sea inferior a la suma de las variaciones absolutas de los gastos y el costo de capital generado por los inventarios de un período a otro.</p>
-                <p>Que el ingreso neto del Flujo Monetario haya resultado positivo en {{ $data['simb_modeda'] }} {{ number_format($value, 2) . ($item->voiced == '2' ? '%' : '') }} califica de manera favorable la gestión de esos movimientos de dinero en los dos ${{{ $data['periodo_nombre_plural'] }}} consecutivos comparados. De manera general, este resultado obliga a la empresa ${{{ $data['nombre_empresa'] }}}, a identificar las razones por las cuales ha conseguido ese buen desempeño y a tomar medidas que eviten que ese resultado decline. En consecuencia, la empresa para continuar en ese buen camino, deberá consolidar o sistematizar lo que viene realizando en lo concerniente a la evolución de sus ventas netas y de su costo de ventas, sus gastos administrativos, sus gastos de ventas y su costo de capital inmovilizado en inventarios. Será conveniente, que ${{{ $data['nombre_empresa'] }}} ejecute, básicamente, lo siguiente:</p>
+                <p>Que el ingreso neto del Flujo Monetario haya resultado positivo en {{ $data['simb_modeda'] }} {{ number_format($value, 2) . ($item->voiced == '2' ? '%' : '') }} califica de manera favorable la gestión de esos movimientos de dinero en los dos {{ $data['periodo_nombre_plural'] }} consecutivos comparados. De manera general, este resultado obliga a la empresa {{ $data['nombre_empresa'] }}, a identificar las razones por las cuales ha conseguido ese buen desempeño y a tomar medidas que eviten que ese resultado decline. En consecuencia, la empresa para continuar en ese buen camino, deberá consolidar o sistematizar lo que viene realizando en lo concerniente a la evolución de sus ventas netas y de su costo de ventas, sus gastos administrativos, sus gastos de ventas y su costo de capital inmovilizado en inventarios. Será conveniente, que {{ $data['nombre_empresa'] }} ejecute, básicamente, lo siguiente:</p>
                 <ul>
                     <li>Determinar las causas por las cuales se ha obtenido un ingreso neto positivo en el Flujo Monetario.</li>
                     <li>Identificar los costos y gastos más importantes.</li>
@@ -324,7 +326,7 @@
                 @endforeach
 
                 <p>Previamente, se debe precisar que el ingreso neto del Flujo Monetario es un indicador que mediante un monto absoluto mide el grado de eficacia en la gestión del flujo monetario de una organización. El flujo monetario comprende los ingresos (o las ventas netas), los gastos y los inventarios. La gestión del flujo monetario será eficaz si la variación absoluta de los ingresos de un período a otro es mayor a la suma de las variaciones absolutas de los gastos y del costo de capital ocasionado por los inventarios de un período a otro. En el caso que las variaciones absolutas de ambos grupos sean iguales, se calificará como una gestión indiferente o no eficaz ni ineficaz. Se considerará ineficaz cuando la variación absoluta de los ingresos de un período a otro sea inferior a la suma de las variaciones absolutas de los gastos y el costo de capital generado por los inventarios de un período a otro.</p>
-                <p>Que el ingreso neto del Flujo Monetario haya resultado neutro o igual a cero, indica que la gestión de esos movimientos del dinero en los dos {{ $data['periodo_nombre_plural'] }} consecutivos comparados, ofrece oportunidades de mejora. De manera general, este resultado obliga a la empresa ${{{ $data['nombre_empresa'] }}}, a identificar las razones de los buenos y también de los malos resultados y a tomar medidas que eviten que los buenos resultados se debiliten y que superen los malos resultados. Entonces, para que la empresa salga de la zona de indiferencia y se ubique en un espacio que indique una gestión favorable del movimiento de dinero de la empresa, deberá consolidar o sistematizar lo que viene realizando bien y rehacer lo que está haciendo mal en torno a la evolución de sus ventas netas y de su costo de ventas, sus gastos administrativos, sus gastos de ventas y su costo de capital inmovilizado en inventarios. Será conveniente, que …  ${{{ $data['nombre_empresa'] }}} ejecute, mínimamente, lo siguiente:</p>
+                <p>Que el ingreso neto del Flujo Monetario haya resultado neutro o igual a cero, indica que la gestión de esos movimientos del dinero en los dos {{ $data['periodo_nombre_plural'] }} consecutivos comparados, ofrece oportunidades de mejora. De manera general, este resultado obliga a la empresa {{ $data['nombre_empresa'] }}, a identificar las razones de los buenos y también de los malos resultados y a tomar medidas que eviten que los buenos resultados se debiliten y que superen los malos resultados. Entonces, para que la empresa salga de la zona de indiferencia y se ubique en un espacio que indique una gestión favorable del movimiento de dinero de la empresa, deberá consolidar o sistematizar lo que viene realizando bien y rehacer lo que está haciendo mal en torno a la evolución de sus ventas netas y de su costo de ventas, sus gastos administrativos, sus gastos de ventas y su costo de capital inmovilizado en inventarios. Será conveniente, que …  {{ $data['nombre_empresa'] }} ejecute, mínimamente, lo siguiente:</p>
                 <ul>
                     <li>Determinar las causas por las cuales se han hecho algunas cosas bien.</li>
                     <li>Determinar las causas por las cuales algunas cosas no se han hecho bien.</li>
@@ -458,7 +460,7 @@
     <p><b>Recomendación general</b></p>
 
     <p>De manera general, nunca se guíe por el resultado de un solo ratio u observando tan solo el resultado o efecto. Por el contrario, trate de observar el bosque y no solo el árbol, así como las causas y los efectos de uno y otro ratio, y los motivos y las consecuencias al interior de cada ratio. Un buen ratio, puede haber sido efecto de un mal desempeño en otro, como por ejemplo, cuando aumenta la razón corriente como consecuencia de la disminución de la rentabilidad, o si la razón corriente sube como fruto del incremento de las cuentas por cobrar. Puede haber disminuido el efectivo y esa variación puede estar explicada por el aumento de las cuentas por cobrar, pero al mismo tiempo esas fluctuaciones pueden haberse convertido en mayor ingresos o ventas netas. Es decir, lo que está encima comúnmente no explica lo que ocurre por debajo y por lo tanto solo indica el estado de salud parcial de su negocio. Entonces, si un indicador de liquidez, solvencia, gestión, rentabilidad o flujo monetario, aumentó, no necesariamente será bueno o malo, o de haber sucedido lo contrario, tampoco será malo ni bueno. Al final, lo que le debe interesar es que el conjunto de ratios se comporte en favor de la rentabilidad sostenida de la organización.</p>
-    <p><b>GLOSARIO DE TÉRMINOS</b></p>
+    <p style="page-break-before: always;"><b>GLOSARIO DE TÉRMINOS</b></p>
     <p><b>Ciclo de caja</b></p>
     <p>Integra tres indicadores en uno: el período promedio de cobro, período promedio de pago y período promedio de inventarios. Así, arroja el saldo promedio en días equivalentes a efectivo que queda después de sumar el promedio de días en inventarios con el promedio de días en cuentas por cobrar y restar el promedio de días de pago. En vista que el promedio de días en inventarios más el promedio de días en cuentas por cobrar viene a ser el ciclo operativo, se calcula también deduciendo al ciclo operativo el promedio de días de pago. </p>
 
