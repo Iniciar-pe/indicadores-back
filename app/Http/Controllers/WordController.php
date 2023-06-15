@@ -21,18 +21,18 @@ class WordController extends Controller
 
     public function downloadWord(Request $request) {
 
-        $bussines = Business::select('id_empresa as bussines', 'tipo_empresa as type', 'id_empresa_padre as father')->where([
+        $bussines = Business::select('id_empresa as bussines', 'nombre_empresa as name', 'tipo_empresa as type', 'id_empresa_padre as father')->where([
             'id_empresa' => $request->get('e')
         ])->first();
 
-        $response = Criterion::select('nombre_empresa as name', 'tbl_periodos_calculo.singular as singular', 'mes_inicio as moth',
+        $response = Criterion::select( 'tbl_periodos_calculo.singular as singular', 'mes_inicio as moth',
             'anio_fin as  year', 'mes_fin as mothEnd', 'anio_fin as yearEnd', 'mes_inicio_pa as moth_pa', 'anio_fin_pa as  year_pa',
             'mes_fin_pa as mothEnd_pa', 'anio_fin_pa as yearEnd_pa', 'tbl_monedas.descripcion as name_currency', 'simbolo as symbol',
             'numero_dias as days', 'id_criterio', 'tbl_periodos_calculo.plural as plural')
             ->where([
                 'tbl_criterios.id_empresa' => $bussines->type == '3' ? $bussines->father : $bussines->bussines,
             ])
-            ->join('tbl_empresas', 'tbl_empresas.id_empresa', '=', 'tbl_criterios.id_empresa')
+            //->join('tbl_empresas', 'tbl_empresas.id_empresa', '=', 'tbl_criterios.id_empresa')
             ->join('tbl_periodos_calculo', 'tbl_periodos_calculo.id_periodo', '=', 'tbl_criterios.id_periodo')
             ->join('tbl_monedas', 'tbl_monedas.id_moneda', '=', 'tbl_criterios.id_moneda')
             ->first();
@@ -64,7 +64,7 @@ class WordController extends Controller
 
 
         $data = [
-            'nombre_empresa' => $response->name,
+            'nombre_empresa' => $bussines->name,
             'periodo_actual' => $period_actual,
             'periodo_anterior' => $period_anterior,
             'periodo_nombre' => $response->singular,
