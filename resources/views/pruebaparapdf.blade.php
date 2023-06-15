@@ -116,7 +116,7 @@
 
             <tr >
                 <td style="border-bottom: solid 1px black;font-size: 13px;">{{ $item->name }}</td>
-                <td style="border-bottom: solid 1px black;font-size: 13px;">{{ number_format(( $item->voiced == '2' ? (float)$item->result * 100 : (float)$item->result), 2) . ($item->voiced == '2' ? '%' : '') }}</td>
+                <td style="border-bottom: solid 1px black;font-size: 13px;text-align: right;">{{ number_format(( $item->voiced == '2' ? (float)$item->result * 100 : (float)$item->result), 2) . ($item->voiced == '2' ? '%' : '') }}</td>
             </tr>
 
         @endforeach
