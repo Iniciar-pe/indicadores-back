@@ -31,6 +31,7 @@ class WordController extends Controller
             'numero_dias as days', 'id_criterio', 'tbl_periodos_calculo.plural as plural')
             ->where([
                 'tbl_criterios.id_empresa' => $bussines->type == '3' ? $bussines->father : $bussines->bussines,
+                'activo' => 'A'
             ])
             //->join('tbl_empresas', 'tbl_empresas.id_empresa', '=', 'tbl_criterios.id_empresa')
             ->join('tbl_periodos_calculo', 'tbl_periodos_calculo.id_periodo', '=', 'tbl_criterios.id_periodo')
