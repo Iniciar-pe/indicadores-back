@@ -79,8 +79,8 @@ class WordController extends Controller
         ];
 
         $pdf = PDF::loadView('pruebaparapdf', compact('data'));
-        return  $pdf->stream('prueba.pdf');
-        // return $pdf->download('pruebapdf.pdf');
+    //return  $pdf->stream('prueba.pdf');
+        return $pdf->download('pruebapdf.pdf');
 
     }
 
