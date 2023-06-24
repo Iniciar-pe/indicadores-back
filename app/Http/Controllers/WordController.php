@@ -47,7 +47,7 @@ class WordController extends Controller
             ->where([
                 'id_criterio' => $response->id_criterio,
                 'id_empresa' => $bussines->type == '3' ? $bussines->father : $bussines->bussines,
-                'tipo' => '2',
+                //'tipo' => '2',
             ])
             ->orderBy('orden', 'asc')
             ->get();
@@ -79,7 +79,7 @@ class WordController extends Controller
         ];
 
         $pdf = PDF::loadView('pruebaparapdf', compact('data'));
-        // return  $pdf->stream('prueba.pdf');
+    //return  $pdf->stream('prueba.pdf');
         return $pdf->download('pruebapdf.pdf');
 
     }
