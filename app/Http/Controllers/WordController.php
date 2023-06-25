@@ -8,6 +8,7 @@ use App\Models\Indicator;
 use Carbon\Carbon;
 use App\Models\Values;
 use App\Models\Business;
+use App\Models\LicenseDistribution;
 use PDF;
 
 
@@ -21,8 +22,16 @@ class WordController extends Controller
 
     public function downloadWord(Request $request) {
 
-        $bussines = Business::select('id_empresa as bussines', 'nombre_empresa as name', 'tipo_empresa as type', 'id_empresa_padre as father')->where([
+        $bussines = Business::select('id_empresa as bussines', 'nombre_empresa as name', 'tipo_empresa as type',
+            'id_empresa_padre as father', 'id_usuario as user')->where([
             'id_empresa' => $request->get('e')
+        ])->first();
+
+        $license =  LicenseDistribution::select('id_plan as plan')
+        ->where([
+            'id_usuario' => $bussines->user,
+            'id_empresa' => $request->get('e'),
+            'id_usuario_asignado' => auth()->user()->id_usuario
         ])->first();
 
         $response = Criterion::select( 'tbl_periodos_calculo.singular as singular', 'mes_inicio as moth',
@@ -75,7 +84,8 @@ class WordController extends Controller
             'indicador' => $indicador,
             'indicadorType' => $indicadorType,
             'periodo_nombre_plural' => $response->plural,
-            'days' => $response->days
+            'days' => $response->days,
+            'license' => $license,
         ];
 
         $pdf = PDF::loadView('pruebaparapdf', compact('data'));

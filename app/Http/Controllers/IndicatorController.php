@@ -102,7 +102,7 @@ class IndicatorController extends Controller
         $indicador->formula_mostrar = $request->get('view');
         $indicador->tipo = $request->get('type');
         $indicador->nemonico = $request->get('nemonico');
-        $indicador->detalle_resultado = $request->get('detalle_resultado');
+        $indicador->detalle_resultado = $request->get('detalle_resultado') ? $request->get('detalle_resultado') : '';
         $indicador->lista_variables = $request->get('lista_variables');
         $indicador->save();
         return response()->json([

@@ -165,6 +165,8 @@
         <P>Que el ciclo de caja (período promedio de inventarios + período promedio de cobro - período promedio de pago) de su negocio haya sido negativo en {{$indicator['CICLO_DE_CAJA_VALUE']}} días, refleja que su negocio, cobra y libera sus inventarios más rápido de lo que tarda en pagar a los proveedores. En esta situación, uno de los aspectos más importantes a considerar es si la mayor rapidez en la cobranza y en la rotación de los inventarios respecto a la velocidad de pago, resulta conveniente desde el punto de vista del costo del dinero externo e interno. En consecuencia, el negocio debe evaluar si para lograr un ciclo de caja negativo, le resulta favorable recurrir más a fondos externos que a fondos propios. Será asi, siempre y cuando el costo de los fondos propios (o costo de oportunidad) sea mayor que el gasto financiero (o interés) de los fondos externos.</P>
     @endif
 
+    @if($data['license']->plan != '1')
+
     <P><b>COSTO DE CAPITAL</b></P>
 
     @if($indicator['TASA_MES_ACTUAL_GF'] > $indicator['TASA_MES_ACTUAL_CO'])
@@ -337,6 +339,8 @@ Es un indicador que mediante un monto absoluto mide el grado de eficacia en la g
             <li>IElegir y llevar a cabo estrategias y acciones enfocadas en la superación de las causas identificadas y en los costos, gastos e inventarios más relevantes.</li>
         </ul>
     </ol>
+
+    @endif
 
     @endif
 
