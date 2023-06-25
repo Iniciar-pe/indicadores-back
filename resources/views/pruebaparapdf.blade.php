@@ -121,9 +121,8 @@
         @endforeach
     </table>
 
-    <p>y luego en cada uno se plantean estrategias y acciones para mejorar su desempeño.</p>
     <p style="page-break-before: always;"><b>INTERPRETACIÓN DE LOS RATIOS FINANCIEROS Y SUGERENCIAS</b></p>
-    <p>A continuación, se explican los resultados de los ratios financieros de la empresa</p>
+    <p>A continuación, se explican los resultados de los ratios financieros de la empresa {{$data['nombre_empresa']}} y luego en cada uno se plantean estrategias y acciones para mejorar su desempeño.</p>
     <p ><b>RECOMENDACIÓN GENERAL</b></p>
     <p>De manera general, nunca se guíe por el resultado de un solo ratio u observando tan solo el resultado o efecto. Por el contrario, trate de observar el bosque y no solo el árbol, así como las causas y los efectos de uno y otro ratio, y los motivos y las consecuencias al interior de cada ratio. Un buen ratio, puede haber sido efecto de un mal desempeño en otro, como por ejemplo, cuando aumenta la razón corriente como consecuencia de la disminución de la rentabilidad, o si la razón corriente sube como fruto del incremento de las cuentas por cobrar. Puede haber disminuido el efectivo y esa variación puede estar explicada por el aumento de las cuentas por cobrar, pero al mismo tiempo esas fluctuaciones pueden haberse convertido en mayor ingresos o ventas netas. Es decir, lo que está encima comúnmente no explica lo que ocurre por debajo y por lo tanto solo indica el estado de salud parcial de su negocio. Entonces, si un indicador de liquidez, solvencia, gestión, rentabilidad o flujo monetario, aumentó, no necesariamente será bueno o malo, o de haber sucedido lo contrario, tampoco será malo ni bueno. Al final, lo que le debe interesar es que el conjunto de ratios se comporten en favor de la rentabilidad sostenida de la organización.</p>
 
@@ -165,6 +164,8 @@
     @if($indicator['CICLO_DE_CAJA'] < 0)
         <P>Que el ciclo de caja (período promedio de inventarios + período promedio de cobro - período promedio de pago) de su negocio haya sido negativo en {{$indicator['CICLO_DE_CAJA_VALUE']}} días, refleja que su negocio, cobra y libera sus inventarios más rápido de lo que tarda en pagar a los proveedores. En esta situación, uno de los aspectos más importantes a considerar es si la mayor rapidez en la cobranza y en la rotación de los inventarios respecto a la velocidad de pago, resulta conveniente desde el punto de vista del costo del dinero externo e interno. En consecuencia, el negocio debe evaluar si para lograr un ciclo de caja negativo, le resulta favorable recurrir más a fondos externos que a fondos propios. Será asi, siempre y cuando el costo de los fondos propios (o costo de oportunidad) sea mayor que el gasto financiero (o interés) de los fondos externos.</P>
     @endif
+
+    @if($data['license']->plan != '1')
 
     <P><b>COSTO DE CAPITAL</b></P>
 
@@ -338,6 +339,8 @@ Es un indicador que mediante un monto absoluto mide el grado de eficacia en la g
             <li>IElegir y llevar a cabo estrategias y acciones enfocadas en la superación de las causas identificadas y en los costos, gastos e inventarios más relevantes.</li>
         </ul>
     </ol>
+
+    @endif
 
     @endif
 
