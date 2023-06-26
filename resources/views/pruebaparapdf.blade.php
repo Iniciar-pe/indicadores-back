@@ -54,7 +54,7 @@
 
 
 </head>
-<body>
+<body style="padding-left:5%;padding-right:5%;">
   <header>
 
   </header>
@@ -79,9 +79,10 @@
     <h2>RESUMEN EJECUTIVO</h2>
     <h3>Análisis de estados financieros</h3>
     </center>
+
   <table style="width:100%;">
         <tr >
-            <td>Empresa:<br><br></td>
+            <td style="width:25%;">Empresa:<br><br></td>
             <td>{{ $data['nombre_empresa'] }}<br><br></td>
         </tr>
         <tr>
