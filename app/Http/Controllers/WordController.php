@@ -31,7 +31,7 @@ class WordController extends Controller
         ->where([
             'id_usuario' => $bussines->user,
             'id_empresa' => $request->get('e'),
-            'id_usuario_asignado' => 4//auth()->user()->id_usuario
+            'id_usuario_asignado' => auth()->user()->id_usuario
         ])->first();
 
         $response = Criterion::select( 'tbl_periodos_calculo.singular as singular', 'mes_inicio as moth',
