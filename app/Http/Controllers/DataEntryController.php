@@ -55,7 +55,7 @@ class DataEntryController extends Controller
         if ($request->get('type') == '3') {
 
             $criterion = Criterion:: select('id_criterio as id', 'id_empresa as business', 'id_periodo as period', 'tbl_monedas.id_moneda as currency', 'mes_inicio as startMonth',
-                'anio_inicio as startYear', 'mes_fin as endMonth', 'anio_fin as endYear', 'mes_inicio_pa as startMonthPeriod',
+                'anio_inicio as startYear', 'mes_fin as endMonth', 'anio_fin as endYear', 'mes_inicio_pa as startMonthPeriod', 'tbl_monedas.simbolo as symbol',
                 'anio_inicio_pa as startYearPeriod', 'mes_fin_pa as endMonthPeriod', 'anio_fin_pa as endYearPeriod', 'descripcion as nameCurrency')
                 ->join('tbl_monedas', 'tbl_monedas.id_moneda', '=', 'tbl_criterios.id_moneda')
                 ->where([
@@ -69,7 +69,7 @@ class DataEntryController extends Controller
         } else {
 
             $criterion = Criterion:: select('id_criterio as id', 'id_empresa as business', 'id_periodo as period', 'tbl_monedas.id_moneda as currency', 'mes_inicio as startMonth',
-                'anio_inicio as startYear', 'mes_fin as endMonth', 'anio_fin as endYear', 'mes_inicio_pa as startMonthPeriod',
+                'anio_inicio as startYear', 'mes_fin as endMonth', 'anio_fin as endYear', 'mes_inicio_pa as startMonthPeriod', 'tbl_monedas.simbolo as symbol',
                 'anio_inicio_pa as startYearPeriod', 'mes_fin_pa as endMonthPeriod', 'anio_fin_pa as endYearPeriod', 'descripcion as nameCurrency')
                 ->join('tbl_monedas', 'tbl_monedas.id_moneda', '=', 'tbl_criterios.id_moneda')
                 ->where([
